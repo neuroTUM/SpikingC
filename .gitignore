@@ -1,3 +1,6 @@
+# Target folder
+target/
+
 # Prerequisites
 *.d
 
