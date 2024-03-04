@@ -1,2 +1,4 @@
 ---
-BasedOnStyle: LLVM
+BasedOnStyle: Microsoft
+BreakConstructorInitializers: AfterColon
+PackConstructorInitializers: Never
