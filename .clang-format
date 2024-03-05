@@ -1,2 +1,4 @@
 ---
 BasedOnStyle: Microsoft
+BreakConstructorInitializers: AfterColon
+PackConstructorInitializers: Never
