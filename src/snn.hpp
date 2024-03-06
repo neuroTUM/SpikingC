@@ -3,8 +3,12 @@
 
 #include "../include/Eigen/Dense"
 #include <vector>
+#include <string>
 #include <iostream>
+#include <fstream>
+#include "../include/json.hpp"
 
+using json = nlohmann::json;
 using namespace std;
 
 template <typename T> 
@@ -44,6 +48,9 @@ class Leaky{
         // 1 = subtract mechanism, 0 = zero mechanisam
         vector<bool> reset_type;
 
+        // Path to weights and biases
+        string path;
+
         // Weights
         Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> W;
 
@@ -80,7 +87,7 @@ class Leaky{
 
         // Constructor
         Leaky(unsigned int num_layers, unsigned int batch_size, unsigned int time_steps, vector<unsigned int> layer_size, 
-              vector<float> beta, vector<float> threshold, vector<bool> reset_type);
+              string path, vector<float> beta, vector<float> threshold, vector<bool> reset_type);
 
         // Loads input spikes
         void loadInput(vector<vector<float>>& input);

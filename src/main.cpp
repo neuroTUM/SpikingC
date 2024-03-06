@@ -3,13 +3,18 @@
 #include "../include/Eigen/Dense"
 #include <cstdlib>
 #include <vector>
+#include <fstream>
+#include "../include/json.hpp"
+#include <string>
 
+using json = nlohmann::json;
 using namespace std;
 
 int main()
 {
     srand((unsigned) time(NULL));
 
+    string path = "../models/SNN_3L_simple_LIF_NMNIST/extra_formats/model_weights.json";
     unsigned int num_layers = 3;
     unsigned int batch_size = 128;
     unsigned int time_steps = 31;
@@ -21,7 +26,7 @@ int main()
     threshold.insert(threshold.end(), {2.5, 8.0, 4.0});
     vector<bool> reset_type;
     reset_type.insert(reset_type.end(), {false, false, true, false});
-    Leaky<char> model(num_layers, batch_size, time_steps, layer_size, beta, threshold, reset_type);
+    Leaky<char> model(num_layers, batch_size, time_steps, layer_size, path, beta, threshold, reset_type);
 
     return 0;
 }

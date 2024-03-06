@@ -2,7 +2,7 @@
 
 template <typename T> 
 Leaky<T>::Leaky(unsigned int num_layers, unsigned int batch_size, unsigned int time_steps, vector<unsigned int> layer_size, 
-                vector<float> beta, vector<float> threshold, vector<bool> reset_type){
+                string path, vector<float> beta, vector<float> threshold, vector<bool> reset_type){
 
     this->num_layers    = num_layers;
     this->batch_size    = batch_size;
@@ -12,6 +12,7 @@ Leaky<T>::Leaky(unsigned int num_layers, unsigned int batch_size, unsigned int t
     this->threshold     = threshold;
     this->reset_type    = reset_type;
     this->curr_layer    = 0;
+    this->path          = path;
 
 
     // Initializing U to zero for all layers
@@ -37,9 +38,32 @@ void Leaky<T>::loadInput(vector<vector<float>>& input){
 
 template <typename T>
 bool Leaky<T>::loadWeights(){
-    // Weights and biases are only loaded for the current layer because in case of larger networks this could explode in terms of memory requirements
-    this->W = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>::Random(this->layer_size[this->curr_layer + 1], this->layer_size[this->curr_layer]);
-    this->B = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>::Random(this->layer_size[this->curr_layer + 1], this->batch_size);
+
+    /* Weights and biases are only loaded for the current layer because in case of 
+       larger networks this could explode in terms of memory requirements
+    */
+
+    std::ifstream f(path);
+    json data = json::parse(f);
+    this->W.resize(this->layer_size[this->curr_layer + 1], this->layer_size[this->curr_layer]);
+    this->B.resize(this->layer_size[this->curr_layer + 1], this->batch_size);
+
+    string weights = "fc" + to_string(this->curr_layer) + ".weight";
+    string biases = "fc" + to_string(this->curr_layer) + ".bias";
+
+    for(unsigned int row = 0; row < this->W.rows(); row++){
+        for(unsigned int col = 0; col < this->W.cols(); col++){
+            unsigned int idx = (row * W.cols()) + col;
+            this->W(row, col) = data[weights][idx];
+        }
+    }
+
+    for(unsigned int row = 0; row < this->B.rows(); row++){
+        for(unsigned int col = 0; col < this->B.cols(); col++){
+            this->B(row, col) = data[biases][col];
+        }
+    }
+
     return true;
 }
 
