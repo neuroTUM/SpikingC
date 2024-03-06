@@ -1,7 +1,7 @@
 #ifndef SNN_HPP
 #define SNN_HPP
 
-#include <../Eigen/Dense>
+#include "../include/Eigen/Dense"
 #include <vector>
 #include <iostream>
 
@@ -70,6 +70,9 @@ class Leaky{
 
         // Performs necessary computations for a LIF neuron
         void performLeaky();
+
+        // Performs the whole sequence of operations for a single batch
+        void computeBatch();
     
     public:
 
@@ -81,9 +84,6 @@ class Leaky{
 
         // Loads input spikes
         void loadInput(vector<vector<float>>& input);
-
-        // Performs the whole sequence of operations for a single batch
-        void computeBatch();
 
         // Reads output spikes
         void readOutput(vector<char>& input);
