@@ -27,8 +27,8 @@ void loadInput(string file_path, vector<vector<float>>& input){
 
 int main()
 {
-    string weights_path = "../models/SNN_3L_simple_LIF_NMNIST/extra_formats/model_weights.json";
-    string inputs_path = "../models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs/layer_outputs.json";
+    string weights_path = "../../models/SNN_3L_simple_LIF_NMNIST/extra_formats/model_weights.json";
+    string inputs_path = "../../models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs/layer_outputs.json";
 
     unsigned int num_layers = 3;
     unsigned int time_steps = 31;
