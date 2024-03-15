@@ -9,3 +9,8 @@ run_debug: debug
 
 run_release: release
 	./target/Release/SpikingCpp
+
+clean:
+	rm -rf target
+
+.PHONY: clean
