@@ -1,72 +1,93 @@
 #include <iostream>
-#include "../include/snn.hpp"
-#include "../include/Eigen/Dense"
-#include <cstdlib>
-#include <vector>
-#include <fstream>
-#include "../include/json.hpp"
 #include <string>
 #include <chrono>
+#include "../include/fully_connected.hpp"
+#include "../include/leaky.hpp"
 
-using json = nlohmann::json;
 using namespace std;
 
-void loadInput(string file_path, vector<vector<float>>& input){
-    std::ifstream f(file_path);
-    json data = json::parse(f);
-    vector<float> input_col;
-
-    for(unsigned int row = 0; row < 2312; row++){
-        for(unsigned int col = 0; col < 31; col++){
-            input_col.push_back(data["inputs"][col][0][row]);
-        }
-        input.push_back(input_col);
-        input_col.clear();
-    }
-}
-
 int main()
-{
-    string weights_path = "../../models/SNN_3L_simple_LIF_NMNIST/extra_formats/model_weights.json";
-    string inputs_path = "../../models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs/layer_outputs.json";
+{   
+    #ifdef LOAD
+    loadWeights();
+    loadInputs();
+    #endif
 
-    unsigned int num_layers = 3;
-    unsigned int time_steps = 31;
-    vector<unsigned int> layer_size;
-    layer_size.insert(layer_size.end(), {2312, 2312 / 4, 2312 / 8, 10});
-    vector<float> beta;
-    beta.insert(beta.end(), {0.5, 0.5, 0.5});
-    vector<float> threshold;
-    threshold.insert(threshold.end(), {2.5, 8.0, 4.0});
-    vector<bool> reset_type;
-    reset_type.insert(reset_type.end(), {true, true, true});
+    fp_t** inout = returnInputPtr<fp_t>(0);
 
-    vector<vector<float>> input;
-    loadInput(inputs_path, input);
+    fully_connected<double> FC1(0);
+    leaky<double> LEAKY1(0);
+    fully_connected<double> FC2(1);
+    leaky<double> LEAKY2(1);
+    fully_connected<double> FC3(2);
+    leaky<double> LEAKY3(2);
 
-    cout << "Inputs loaded from the JSON file" << endl;
+    inout = FC1.run(inout);
+    inout = LEAKY1.run(inout);
+    
+    #ifdef TEST
+    std::ifstream f(path_to_inputs);
+    json data = json::parse(f);
+    for(unsigned int i = 0; i < TIME_STEPS; i++){
+        for(unsigned int j = 0; j < layer_size[1]; j++){
+            std::string json_idx = "lif" + std::to_string(1) + "_spikes";
+            fp_t true_val = data[json_idx][i][0][j];
+            if(abs(inout[i][j] - true_val) > PRECISION){
+                std::cout << "Spike value mismatch in the output of a leaky layer at index=" << j 
+                          << ", time step=" << i 
+                          << ", layer=" << 0
+                          << std::endl;
+                std::cout << "Calculated value spike=" << inout[i][j] << ", while the true one is spike_true=" << true_val << std::endl;
+            }
+        }
+    }          
+    #endif    
 
-    Leaky<double> model(num_layers, time_steps, layer_size, weights_path, beta, threshold, reset_type);
-    model.loadInput(input);
+    inout = FC2.run(inout);
+    inout = LEAKY2.run(inout);
 
-    cout << "Inputs passed to the model" << endl;
+    #ifdef TEST
+    for(unsigned int i = 0; i < TIME_STEPS; i++){
+        for(unsigned int j = 0; j < layer_size[2]; j++){
+            std::string json_idx = "lif" + std::to_string(2) + "_spikes";
+            fp_t true_val = data[json_idx][i][0][j];
+            if(abs(inout[i][j] - true_val) > PRECISION){
+                std::cout << "Spike value mismatch in the output of a leaky layer at index=" << j 
+                          << ", time step=" << i 
+                          << ", layer=" << 1
+                          << std::endl;
+                std::cout << "Calculated value spike=" << inout[i][j] << ", while the true one is spike_true=" << true_val << std::endl;
+            }
+        }
+    }          
+    #endif
 
-    auto start = chrono::high_resolution_clock::now();
-    model.computeOutputSpikes();
-    auto end = chrono::high_resolution_clock::now();
-    chrono::duration<double> duration = end - start;
-    double total_time = duration.count();
+    inout = FC3.run(inout);
+    inout = LEAKY3.run(inout);
 
-    cout << "Output spikes computed" << endl;
+    #ifdef TEST
+    for(unsigned int i = 0; i < TIME_STEPS; i++){
+        for(unsigned int j = 0; j < layer_size[3]; j++){
+            std::string json_idx = "lif" + std::to_string(3) + "_spikes";
+            fp_t true_val = data[json_idx][i][0][j];
+            if(abs(inout[i][j] - true_val) > PRECISION){
+                std::cout << "Spike value mismatch in the output of a leaky layer at index=" << j 
+                          << ", time step=" << i 
+                          << ", layer=" << 2
+                          << std::endl;
+                std::cout << "Calculated value spike=" << inout[i][j] << ", while the true one is spike_true=" << true_val << std::endl;
+            }
+        }
+    }          
+    #endif
+    
+    cout << "Predicted class is: " << LEAKY3.predictClass() << endl;
 
-    cout << model.predictClass() << endl;
-
-    cout << "Prediction generated" << endl;
-
-    /* Performance measurments */
-    cout << "Processor load for loading weights: " << (model.load_weights_time / total_time) * 100.0f << endl;
-    cout << "Processor load for fully connected layers: " << (model.compute_fc_time / total_time) * 100.0f << endl;
-    cout << "Processor load for LIF neurons: " << (model.compute_leaky_time / total_time) * 100.0f << endl;
+    for(unsigned int i = 0; i < TIME_STEPS; i++){
+        delete[] inout[i];
+    }
+    delete[] inout;
+    inout = nullptr;
 
     return 0;
 }
