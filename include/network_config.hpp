@@ -13,7 +13,7 @@
 #define L2_SIZE 2312 / 8
 #define L3_SIZE 10
 #define INPUT_SIZE 2312
-#define TIME_STEPS 31
+#define TIME_STEPS 30
 #define NUM_OF_INPUT_IMAGES 1
 
 
