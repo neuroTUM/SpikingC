@@ -101,4 +101,17 @@ void matrixVectorMulSparse(wfloat_2d_array_t* W, wfloat_array_t* B, spike_array_
     }
 }
 
+int extractLabelFromFilename(const std::string &filename)
+{
+    size_t pos = filename.rfind('_');
+    if (pos != std::string::npos)
+    {
+        size_t start = pos + 1;
+        size_t end = filename.rfind('.');
+        std::string labelStr = filename.substr(start, end - start);
+        return std::stoi(labelStr);
+    }
+    return -1;
+}
+
 #endif
