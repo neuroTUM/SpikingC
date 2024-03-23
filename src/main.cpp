@@ -25,21 +25,19 @@ int extractLabelFromFilename(const std::string &filename)
     return -1;
 }
 
-fp_t **loadBinaryData(const std::string &filePath, unsigned int &outRows, unsigned int &outCols)
+void loadBinaryData(const std::string &filePath, fp_t **&data, unsigned int &outRows, unsigned int &outCols)
 {
-    const size_t timeSteps = 30;              // Assuming 30 timesteps
-    const size_t flattenedSize = 2 * 34 * 34; // Flatten the spatial dimensions
+    const size_t timeSteps = TIME_STEPS;
+    const size_t flattenedSize = INPUT_SIZE;
     std::ifstream file(filePath, std::ios::binary);
     if (!file.is_open())
     {
         std::cerr << "Could not open the file " << filePath << std::endl;
-        return nullptr;
+        return;
     }
 
-    fp_t **data = new fp_t *[timeSteps];
     for (size_t t = 0; t < timeSteps; ++t)
     {
-        data[t] = new fp_t[flattenedSize];
         std::vector<int16_t> buffer(flattenedSize);
         file.read(reinterpret_cast<char *>(buffer.data()), flattenedSize * sizeof(int16_t));
         for (size_t i = 0; i < flattenedSize; ++i)
@@ -50,9 +48,7 @@ fp_t **loadBinaryData(const std::string &filePath, unsigned int &outRows, unsign
 
     outRows = timeSteps;
     outCols = flattenedSize;
-    return data;
 }
-
 //int main()
 //{   
 //    #ifdef LOAD
@@ -171,11 +167,14 @@ int main()
     {
         if (entry.is_regular_file() && entry.path().extension() == ".bin")
         {
-            currentFileNumber++;
+            
             std::string filePath = entry.path().string();
             int trueLabel = extractLabelFromFilename(entry.path().filename().string());
             unsigned int rows, cols;
-            fp_t **Data = loadBinaryData(filePath, rows, cols);
+
+            fp_t** Data = returnInputPtr<fp_t>(0);
+
+            loadBinaryData(filePath, Data, rows, cols);
             if (!Data)
                 continue;
 
@@ -197,12 +196,12 @@ int main()
 
             
 
-            //for (unsigned int i = 0; i < TIME_STEPS; i++)
-            //{
-            //    delete[] Data[i];
-            //}
-            //delete[] Data;
-            //Data = nullptr;
+            for (unsigned int i = 0; i < TIME_STEPS; i++)
+            {
+                delete[] Data[i];
+            }
+            delete[] Data;
+            Data = nullptr;
 
 
             // Assume getPredictedLabel() is a method that returns the predicted label
@@ -212,7 +211,11 @@ int main()
             totalPredictions++;
 
             cout << "Predicted class is: " << predictedLabel << " // LABEL: " << trueLabel << endl;
+
+            currentFileNumber++;
             std::cout << "Processing input " << currentFileNumber << " out of " << totalFiles << std::endl;
+            
+            
         }
         // print how many files are left to process
         // Print the current progress

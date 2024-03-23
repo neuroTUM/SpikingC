@@ -8,10 +8,10 @@ project(SpikingCpp)
 set(CMAKE_CXX_STANDARD 17)
 
 # flags for all builds
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pedantic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=leak -g -O0 -Wall -Wextra -Werror -pedantic ")
 
 # flags for debug builds (in addition to cmake defaults)
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -fsanitize=address -fsanitize=undefined -fsanitize=leak")
+set(CMAKE_CXX_FLAGS_DEBUG " ${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -g -O0 -fsanitize=undefined -fsanitize=leak ")
 
 # flags for release builds (in addition to cmake defaults)
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/target)
@@ -21,7 +21,7 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS " Build type: ${CMAKE_BUILD_TYPE} ")
 
 # output binaries to a different folder depending on the build type
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
@@ -29,7 +29,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
 # include include/ directory
 include_directories(include)
 
-file(GLOB SOURCES "src/*.cpp")
+set(SOURCES
+  src/main.cpp
+)
+
+#file(GLOB SOURCES "src/*.cpp ")
+message(STATUS "Sources found: ${SOURCES}")
+
 
 add_executable(SpikingCpp ${SOURCES})
 
