@@ -46,3 +46,5 @@ Makefile
 notebooks/data
 notebooks/cache
 notebooks/tmp
+
+data/

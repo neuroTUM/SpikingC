@@ -1,12 +1,11 @@
-#include "../include/fully_connected.hpp"
-#include "../include/leaky.hpp"
-#include "../include/network_config.hpp"
-#include <chrono>
-#include <filesystem>
-#include <fstream>
 #include <iostream>
-#include <string>
-#include <vector>
+#include <chrono>
+#include "../include/Model.hpp"
+
+#define TIME_STEPS 30
+#define DATA_TEST_DIRECTORY "/home/copparihollmann/neuroTUM/branch_aleksav2/SpikingCpp/data/NMNIST"
+
+#define TESTLOADER
 
 using namespace std;
 
@@ -25,30 +24,30 @@ int extractLabelFromFilename(const std::string &filename)
     return -1;
 }
 
-void loadBinaryData(const std::string &filePath, fp_t **&data, unsigned int &outRows, unsigned int &outCols)
-{
-    const size_t timeSteps = TIME_STEPS;
-    const size_t flattenedSize = INPUT_SIZE;
-    std::ifstream file(filePath, std::ios::binary);
-    if (!file.is_open())
-    {
-        std::cerr << "Could not open the file " << filePath << std::endl;
-        return;
-    }
-
-    for (size_t t = 0; t < timeSteps; ++t)
-    {
-        std::vector<int16_t> buffer(flattenedSize);
-        file.read(reinterpret_cast<char *>(buffer.data()), flattenedSize * sizeof(int16_t));
-        for (size_t i = 0; i < flattenedSize; ++i)
-        {
-            data[t][i] = static_cast<fp_t>(buffer[i]);
-        }
-    }
-
-    outRows = timeSteps;
-    outCols = flattenedSize;
-}
+//void loadBinaryData(const std::string &filePath, fp_t **&data, unsigned int &outRows, unsigned int &outCols)
+//{
+//    const size_t timeSteps = TIME_STEPS;
+//    const size_t flattenedSize = INPUT_SIZE;
+//    std::ifstream file(filePath, std::ios::binary);
+//    if (!file.is_open())
+//    {
+//        std::cerr << "Could not open the file " << filePath << std::endl;
+//        return;
+//    }
+//
+//    for (size_t t = 0; t < timeSteps; ++t)
+//    {
+//        std::vector<int16_t> buffer(flattenedSize);
+//        file.read(reinterpret_cast<char *>(buffer.data()), flattenedSize * sizeof(int16_t));
+//        for (size_t i = 0; i < flattenedSize; ++i)
+//        {
+//            data[t][i] = static_cast<fp_t>(buffer[i]);
+//        }
+//    }
+//
+//    outRows = timeSteps;
+//    outCols = flattenedSize;
+//}
 //int main()
 //{   
 //    #ifdef LOAD
@@ -139,20 +138,62 @@ void loadBinaryData(const std::string &filePath, fp_t **&data, unsigned int &out
 
 
 int main()
-{
+{   
+    auto start = chrono::high_resolution_clock::now();
 
-#ifdef LOAD
+    #ifdef LOAD
     loadWeights();
-    loadInputs();
-#endif
+    #endif
 
-    const std::string directoryPath = "/home/copparihollmann/neuroTUM/SpikingCpp/tests/NMNIST";
+    /************************************************************************************************/
+    Model SNN;
+    cfloat_array_t In;
+
+    #ifdef DEBUG
+
+    #ifdef LOAD
+    parseReferenceJSON();
+    #endif
+    /* Reset membrane potentials and spikes */
+    SNN.resetState();
+    
+    for(unsigned int i = 0; i < TIME_STEPS; i++){
+        
+        /* Load intput for this time step */
+        for(unsigned int j = 0; j < INPUT_SIZE; j++){
+            scrachpad_memory[j] = output_ref["inputs"][i][0][j];
+        }
+        In.ptr = scrachpad_memory;
+        In.size = INPUT_SIZE;
+
+        /* Perform computations */
+        SNN.run(&In);
+    }
+
+    cout << "Predicted class is " << SNN.predict() << endl;
+
+    /************************************************************************************************/
+    auto end = chrono::high_resolution_clock::now();
+    double time_taken = chrono::duration_cast<chrono::nanoseconds>(end - start).count();
+
+    time_taken *= 1e-9;
+
+    cout << "Time taken by program is : " << fixed << time_taken << setprecision(9);
+    cout << " sec" << endl;
+    #endif
+
+    /************************************************************************************************/
+
+
+    #ifdef TESTLOADER
+    // Current file being processed
+    unsigned int currentFileNumber = 0;
     unsigned int totalPredictions = 0;
     unsigned int correctPredictions = 0;
 
     // Determine the total number of .bin files
     unsigned int totalFiles = 0;
-    for (const auto &entry : fs::directory_iterator(directoryPath))
+    for (const auto &entry : fs::directory_iterator(DATA_TEST_DIRECTORY))
     {
         if (entry.is_regular_file() && entry.path().extension() == ".bin")
         {
@@ -160,52 +201,39 @@ int main()
         }
     }
 
-    // Current file being processed
-    unsigned int currentFileNumber = 0;
-
-    for (const auto &entry : fs::directory_iterator(directoryPath))
+    for (const auto &entry : fs::directory_iterator(DATA_TEST_DIRECTORY))
     {
         if (entry.is_regular_file() && entry.path().extension() == ".bin")
         {
             
             std::string filePath = entry.path().string();
             int trueLabel = extractLabelFromFilename(entry.path().filename().string());
-            unsigned int rows, cols;
 
-            fp_t** Data = returnInputPtr<fp_t>(0);
-
-            loadBinaryData(filePath, Data, rows, cols);
-            if (!Data)
-                continue;
-
-            fully_connected<double> FC1(0);
-            leaky<double> LEAKY1(0);
-            fully_connected<double> FC2(1);
-            leaky<double> LEAKY2(1);
-            fully_connected<double> FC3(2);
-            leaky<double> LEAKY3(2);
-
-            Data = FC1.run(Data);
-            Data = LEAKY1.run(Data);
-            Data = FC2.run(Data);
-            Data = LEAKY2.run(Data);
-            Data = FC3.run(Data);
-            Data = LEAKY3.run(Data);
-
-            int predictedLabel = LEAKY3.predictClass();
-
-            
-
-            for (unsigned int i = 0; i < TIME_STEPS; i++)
+            std::ifstream file(filePath, std::ios::binary);
+            if (!file.is_open())
             {
-                delete[] Data[i];
+                std::cerr << "Could not open the file " << filePath << std::endl;
             }
-            delete[] Data;
-            Data = nullptr;
 
+            SNN.resetState();
 
-            // Assume getPredictedLabel() is a method that returns the predicted label
-            // unsigned int predictedLabel = getPredictedLabel(inputData);
+            for (size_t t = 0; t < TIME_STEPS; ++t)
+            {
+                std::vector<int16_t> buffer(INPUT_SIZE);
+                file.read(reinterpret_cast<char *>(buffer.data()), INPUT_SIZE * sizeof(int16_t));
+                for (size_t i = 0; i < INPUT_SIZE; ++i)
+                {
+                    scrachpad_memory[i] = static_cast<cfloat_t>(buffer[i]);
+                }
+
+                In.ptr = scrachpad_memory;
+                In.size = INPUT_SIZE;
+
+                /* Perform computations */
+                SNN.run(&In);
+            }
+
+            int predictedLabel = SNN.predict();
 
             if (predictedLabel == trueLabel) correctPredictions++;
             totalPredictions++;
@@ -214,7 +242,8 @@ int main()
 
             currentFileNumber++;
             std::cout << "Processing input " << currentFileNumber << " out of " << totalFiles << std::endl;
-            
+
+            /************************************************************************************************/
             
         }
         // print how many files are left to process
@@ -222,11 +251,8 @@ int main()
         
     }
 
-    cout << "WE GOT UP TO THIS POINT" << endl;
-
     if (totalPredictions > 0)
     {
-        cout << "ALMOST THERE" << endl;
         float accuracy = static_cast<float>(correctPredictions) / totalPredictions;
         std::cout << "Accuracy: " << accuracy << std::endl;
     }
@@ -234,6 +260,16 @@ int main()
     {
         std::cout << "No files processed." << std::endl;
     }
+
+    auto end = chrono::high_resolution_clock::now();
+    double time_taken = chrono::duration_cast<chrono::nanoseconds>(end - start).count();
+
+    time_taken *= 1e-9;
+
+    cout << "Time taken by program is : " << fixed << time_taken << setprecision(9);
+    cout << " sec" << endl;
+    #endif
+      
 
     return 0;
 }
