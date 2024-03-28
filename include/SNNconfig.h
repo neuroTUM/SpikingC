@@ -1,14 +1,29 @@
-#ifndef SNNCONFIGCONFIG_HPP
-#define SNNCONFIG_HPP
+/*
+    Author's name: Aleksa Stojkovic
+    Date of creation: 27.3.2024
+    Description: Configuration file for the entire network
+*/
 
+#ifndef SNNCONFIGCONFIG_H
+#define SNNCONFIG_H
+
+/* Common includes */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/* Test related macros */
 // #define TEST
 #define LOAD
 #define PRECISION 1e-4
 
-#include <iostream>
-#include <string>
+/* General macros */
+#define MAX_STR_LEN 10
+#define TRUE 1
+#define FALSE 0
 
 /* Macros used for defining layer parameters and inputs */
+#define TIME_STEPS 31
 #define NUM_LAYERS 6
 #define INPUT_SIZE 2312
 #define L1_SIZE 2312 / 4
@@ -17,8 +32,6 @@
 #define L4_SIZE 2312 / 8
 #define L5_SIZE 10
 #define L6_SIZE 10
-
-#define MASK 0x01
 
 /* Floating point representation for network elements like membrane potentials, thresholds and beta values */
 typedef double cfloat_t;
@@ -29,12 +42,15 @@ typedef double wfloat_t;
 /* Data type used for representing spike data */
 typedef unsigned char spike_t;
 
+/* Data type simulating bool in C */
+typedef unsigned char bool_t;
+
 /* Network parameters */
 unsigned int layer_size[NUM_LAYERS + 1] = {INPUT_SIZE, L1_SIZE, L2_SIZE, L3_SIZE, L4_SIZE, L5_SIZE, L6_SIZE};
-std::string layer_type[NUM_LAYERS] = {"Linear", "LIF", "Linear", "LIF", "Linear", "LIF"};
+char layer_type[NUM_LAYERS][MAX_STR_LEN] = {"Linear", "LIF", "Linear", "LIF", "Linear", "LIF"};
 cfloat_t Beta[NUM_LAYERS] = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5};
 cfloat_t threshold[NUM_LAYERS] = {0, 2.5, 0, 8.0, 0, 4.0};
-bool reset_type[NUM_LAYERS] = {true, true, true, true, true, true};
+bool_t reset_type[NUM_LAYERS] = {TRUE, TRUE, TRUE, TRUE, TRUE, TRUE};
 
 /* Statically allocated memory for weights in row major order */
 wfloat_t W[INPUT_SIZE * L1_SIZE + 
@@ -78,51 +94,6 @@ typedef struct{
 } spike_array_t;
 
 #ifdef LOAD
-#include "../include/json.hpp"
-#include <fstream>
-
-using json = nlohmann::json;
-std::string path_to_weights = "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/model_weights.json";
-std::string path_to_inputs = "../../models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs/layer_outputs.json";
-json output_ref;
-
-void parseReferenceJSON(){
-    std::ifstream f(path_to_inputs);
-    output_ref = json::parse(f);    
-}
-
-void loadWeights(){
-
-    unsigned int idx = 0;
-    std::ifstream f(path_to_weights);
-    json data = json::parse(f);
-
-    for(unsigned int i = 0; i < INPUT_SIZE * L1_SIZE; i++){
-        W[idx++] = data["fc1.weight"][i];
-    }
-
-    for(unsigned int i = 0; i < L2_SIZE * L3_SIZE; i++){
-        W[idx++] = data["fc2.weight"][i];
-    }
-
-    for(unsigned int i = 0; i < L4_SIZE * L5_SIZE; i++){
-        W[idx++] = data["fc3.weight"][i];
-    }
-
-    idx = 0;
-    for(unsigned int i = 0; i < L1_SIZE; i++){
-        B[idx++] = data["fc1.bias"][i];
-    }
-
-    for(unsigned int i = 0; i < L3_SIZE; i++){
-        B[idx++] = data["fc2.bias"][i];
-    }
-
-    for(unsigned int i = 0; i < L5_SIZE; i++){
-        B[idx++] = data["fc3.bias"][i];
-    }
-}
-
 #endif
 
 #endif
