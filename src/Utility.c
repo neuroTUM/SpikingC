@@ -227,7 +227,7 @@ int extractLabelFromFilename(const char *filename)
     size_t length = lastDot - lastUnderscore - 1;
 
     // Extract the label substring
-    char labelStr[10]; // Assuming label is not longer than 9 digits
+    char labelStr[10]; 
     strncpy(labelStr, filename + startPos, length);
     labelStr[length] = '\0'; // Null-terminate the extracted substring
 
