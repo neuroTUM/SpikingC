@@ -1,9 +1,3 @@
-/*
-    Author's name: Aleksa Stojkovic
-    Date of creation: 27.3.2024
-    Description: - 
-*/
-
 #include "../include/Linear.h"
 
 void clearLinear(linear_t* layer){

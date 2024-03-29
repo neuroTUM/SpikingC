@@ -1,9 +1,3 @@
-/*
-    Author's name: Aleksa Stojkovic
-    Date of creation: 27.3.2024
-    Description: -
-*/
-
 #include "../include/Utility.h"
 
 unsigned int min(unsigned int x, unsigned int y){
@@ -96,4 +90,148 @@ void matrixVectorMulSparse(wfloat_2d_array_t* W, wfloat_array_t* B, spike_array_
         }
         Out->ptr[i] = r + B->ptr[i];
     }
+}
+
+#define BUFFER_SIZE 30055
+
+void loadCSVToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned int startIdx, unsigned int elements)
+{
+    FILE *file = fopen(filepath, "r");
+    if (!file)
+    {
+        perror("Failed to open file");
+        return;
+    }
+
+    char buffer[BUFFER_SIZE];
+    unsigned int count = 0;
+    while (fgets(buffer, BUFFER_SIZE, file) && count < elements)
+    {
+        char *token = strtok(buffer, ",");
+        while (token != NULL && count < elements)
+        {
+            W[startIdx + count++] = atof(token);
+            token = strtok(NULL, ",");
+        }
+    }
+    fclose(file);
+}
+
+void loadCSVToStaticBiasArray(const char *filepath, wfloat_t *B, unsigned int startIdx, unsigned int size)
+{
+    FILE *file = fopen(filepath, "r");
+    if (!file)
+    {
+        perror("Failed to open file");
+        return;
+    }
+
+    char buffer[BUFFER_SIZE];
+    unsigned int index = 0;
+    while (fgets(buffer, BUFFER_SIZE, file) && index < size)
+    {
+        B[startIdx + index++] = atof(buffer);
+    }
+    fclose(file);
+}
+
+void loadStaticWeightsAndBiases()
+{
+    // Adjust file paths and array indices as needed
+    loadCSVToStaticWeightArray(PATH_WEIGHTS_FC1, W, 0, INPUT_SIZE * L1_SIZE_OUT);
+    loadCSVToStaticBiasArray(PATH_BIAS_FC1, B, 0, L1_SIZE_OUT);
+
+    // Calculate start index for each subsequent layer based on the previous layers' sizes
+    unsigned int wIdx2 = INPUT_SIZE * L1_SIZE_OUT;
+    unsigned int bIdx2 = L1_SIZE_OUT;
+
+    loadCSVToStaticWeightArray(PATH_WEIGHTS_FC2, W, wIdx2, LIF1_SIZE * L2_SIZE_OUT);
+    loadCSVToStaticBiasArray(PATH_BIAS_FC2, B, bIdx2, L2_SIZE_OUT);
+
+    // And so on for each layer, adjusting the indices accordingly
+    unsigned int wIdx3 = wIdx2 + LIF1_SIZE * L2_SIZE_OUT;
+    unsigned int bIdx3 = bIdx2 + L2_SIZE_OUT;
+
+    loadCSVToStaticWeightArray(PATH_WEIGHTS_FC3, W, wIdx3, LIF2_SIZE * L3_SIZE_OUT);
+    loadCSVToStaticBiasArray(PATH_BIAS_FC3, B, bIdx3, L3_SIZE_OUT);
+}
+
+// Function to read CSV file into a 2D array
+float **readCSV(const char *filename, int *rows, int *cols)
+{
+    FILE *file = fopen(filename, "r");
+    if (!file)
+    {
+        perror("Failed to open file");
+        return NULL;
+    }
+
+    float **data = NULL;
+    char line[MAX_LINE_LENGTH];
+    *rows = 0;
+    while (fgets(line, MAX_LINE_LENGTH, file))
+    {
+        data = realloc(data, (*rows + 1) * sizeof(float *));
+        data[*rows] = malloc(*cols * sizeof(float)); // Assumes 'cols' is set to the correct number of columns
+
+        // Split line into tokens and convert to float
+        char *token = strtok(line, ",");
+        int col = 0;
+        while (token != NULL)
+        {
+            data[*rows][col++] = atof(token);
+            token = strtok(NULL, ",");
+        }
+        (*rows)++;
+    }
+    fclose(file);
+    return data;
+}
+
+// Function to compare two arrays of floats
+int compareOutputs(float *computed, float *expected, int size)
+{
+    for (int i = 0; i < size; i++)
+    {
+        if (fabs(computed[i] - expected[i]) > EPSILON)
+        {
+            return i; // Return the index of first mismatch
+        }
+    }
+    return -1; // No mismatch found
+}
+
+void freeCSVData(float **data, int rows)
+{
+    for (int i = 0; i < rows; i++)
+    {
+        free(data[i]);
+    }
+    free(data);
+}
+
+int extractLabelFromFilename(const char *filename)
+{
+    // Find the last occurrence of underscore and dot in the filename
+    const char *lastUnderscore = strrchr(filename, '_');
+    const char *lastDot = strrchr(filename, '.');
+
+    if (!lastUnderscore || !lastDot)
+    {
+        fprintf(stderr, "Filename format error: %s\n", filename);
+        return -1; 
+    }
+
+    // Calculate positions for label extraction
+    size_t startPos = lastUnderscore - filename + 1;
+    size_t length = lastDot - lastUnderscore - 1;
+
+    // Extract the label substring
+    char labelStr[10]; // Assuming label is not longer than 9 digits
+    strncpy(labelStr, filename + startPos, length);
+    labelStr[length] = '\0'; // Null-terminate the extracted substring
+
+    // Convert extracted label to integer
+    int label = atoi(labelStr);
+    return label;
 }
