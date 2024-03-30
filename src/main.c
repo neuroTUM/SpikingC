@@ -29,7 +29,7 @@ int main(void)
     for (unsigned int i = 0; i < TIME_STEPS; i++)
     {
         // Construct the filename for the current timestep
-        sprintf(filename, "..models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs/input/v1/inputs_timestep_%u.csv", i);
+        sprintf(filename, "../../models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs/input/inputs_timestep_%u.csv", i);
 
         // Load the data for this time step
         int rows, cols;
@@ -37,11 +37,11 @@ int main(void)
         if (!inputData || rows < 1)
         {
             fprintf(stderr, "Failed to load input data for timestep %u\n", i);
-            continue;
+            exit(1);
         }
 
         // Assume inputData[0] contains the input for this timestep
-        for (int j = 0; j < cols && j < In.size; j++)
+        for (unsigned int j = 0; j < (unsigned int)cols && j < In.size; j++)
         {
             In.ptr[j] = inputData[0][j];
         }

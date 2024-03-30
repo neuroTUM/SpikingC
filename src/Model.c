@@ -68,11 +68,11 @@ void run(model_t* model, cfloat_array_t* In){
             model->layers[i].lif_ptr->computeOutput_fptr(model->layers[i].lif_ptr, &(model->floatOut), &(model->spikeOut));
         }
     }
-    
+
     /* Updated the active prediction array after each time step*/
     for(unsigned int i = 0; i < layer_size[NUM_LAYERS]; i += (sizeof(spike_t) * 8)){
         spike_t val = model->spikeOut.ptr[i / (sizeof(spike_t) * 8)];
-        for(unsigned int k = i; k < min(i + (sizeof(spike_t) * 8), layer_size[NUM_LAYERS]); k++){
+        for(unsigned int k = i; k < i + (sizeof(spike_t) * 8) && k < layer_size[NUM_LAYERS]; k++){
             model->actPred[k] += (unsigned int)((val >> (k - i)) & 0x1);
         }
     }

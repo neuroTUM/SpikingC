@@ -29,16 +29,16 @@ typedef union{
     linear_t* linear_ptr;
 } layer_instance_t;
 
-typedef struct{
+typedef struct Model{
     /* A pointer to an array of layers */
     layer_instance_t* layers;
     cfloat_array_t floatOut;
     spike_array_t spikeOut;
     unsigned int *actPred;
-    void (*clearModel_fptr) (model_t*);
-    void (*resetState_fptr) (model_t*);
-    void (*run_fptr) (model_t*, cfloat_array_t*);
-    unsigned int (*predict_fptr) (model_t*);
+    void (*clearModel_fptr) (struct Model*);
+    void (*resetState_fptr) (struct Model*);
+    void (*run_fptr) (struct Model*, cfloat_array_t*);
+    unsigned int (*predict_fptr) (struct Model*);
 } model_t;
 
 /* Allocates memory for each layer and initializes the necessary structures */

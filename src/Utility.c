@@ -1,22 +1,18 @@
 #include "../include/Utility.h"
 
-unsigned int min(unsigned int x, unsigned int y){
-    if(x > y)
-        return y;
-    return x;
-}
+#define BUFFER_SIZE 30055
 
 unsigned int getOffset(unsigned int layer_num, char offset_type, char* str){
     unsigned int offset = 0;
 
     for(unsigned int i = 0; i < layer_num; i++){
-        if(strcmp(layer_type[i], "Linear") == 0){
+        if(strcmp(layer_type[i], "Linear") == 0 && strcmp(str, "Linear") == 0){
             if(offset_type == 'M')
                 offset += layer_size[i] * layer_size[i + 1];
             else if(offset_type == 'V')
                 offset += layer_size[i + 1];
         }
-        else if(strcmp(layer_type[i], "LIF") == 0){
+        else if(strcmp(layer_type[i], "LIF") == 0 && strcmp(str, "LIF") == 0){
             if(offset_type == 'V')
                 offset += layer_size[i + 1];
             else if(offset_type == 'S')
@@ -82,7 +78,7 @@ void matrixVectorMulSparse(wfloat_2d_array_t* W, wfloat_array_t* B, spike_array_
             if(val == 0)
                 continue;
             else{
-                for(unsigned int k = j; k < min(j + sizeof(spike_t) * 8, W->cols); k++){
+                for(unsigned int k = j; k < j + sizeof(spike_t) * 8 && j < W->cols; k++){
                     if(BITVALUE(val, k - j))
                         r += W->ptr[i][k];
                 }
@@ -91,8 +87,6 @@ void matrixVectorMulSparse(wfloat_2d_array_t* W, wfloat_array_t* B, spike_array_
         Out->ptr[i] = r + B->ptr[i];
     }
 }
-
-#define BUFFER_SIZE 30055
 
 void loadCSVToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned int startIdx, unsigned int elements)
 {

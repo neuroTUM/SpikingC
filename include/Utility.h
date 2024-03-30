@@ -8,15 +8,13 @@
 #define UTILITY_H
 
 #include "SNNconfig.h"
+#include <math.h>
 
 #define MAX_LINE_LENGTH 10000 // Adjust based on your CSV line length
 #define EPSILON 0.001         // Acceptable margin of error for comparison
 
 /* Macro function used to access individual bits */
 #define BITVALUE(X, N) (((X) >> (N)) & 0x1)
-
-/* Returns the smaller value */
-unsigned int min(unsigned int x, unsigned int y);
 
 /* Returns offsets for pointer positioning */
 /* Offset type is 'M' for matrices, 'V' for float vectors and 'S' for spikes */

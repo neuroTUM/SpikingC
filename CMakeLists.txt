@@ -8,15 +8,23 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -pedantic")
 
 # flags for debug builds (in addition to cmake defaults)
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0 -fsanitize=address -fsanitize=undefined -fsanitize=leak")
 
 # flags for release builds (in addition to cmake defaults)
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3")
+
+# flags for release builds (in addition to cmake defaults)
+set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/target)
 
 # Set default build type to Debug if not specified
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
+
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
+# output binaries to a different folder depending on the build type
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
 
 # Include the "include" directory for header files
 include_directories(include)

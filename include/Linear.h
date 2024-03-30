@@ -10,12 +10,12 @@
 #include "Utility.h"
 
 /* A structure holding all relevant data for linear layers */
-typedef struct{
+typedef struct Linear{
     unsigned int layer_num;
     wfloat_2d_array_t W;
     wfloat_array_t B;
     /* A pointer to the clearLinear function */
-    void (*clearLinear_fptr) (linear_t*);
+    void (*clearLinear_fptr) (struct Linear*);
     void (*matrixVectorMul_fptr) (wfloat_2d_array_t*, wfloat_array_t*, cfloat_array_t*, cfloat_array_t*);
     void (*matrixVectorMulSparse_fptr) (wfloat_2d_array_t*, wfloat_array_t*, spike_array_t*, cfloat_array_t*);
 } linear_t;

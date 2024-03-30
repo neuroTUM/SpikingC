@@ -10,13 +10,13 @@
 #include "Utility.h"
 
 /* A structure holding all relevant data for LIF layers */
-typedef struct{
+typedef struct LIF{
     unsigned int layer_num;
     cfloat_array_t U;
     /* A pointer to the clearLIF function */
-    void (*clearLIF_fptr) (lif_t*);
+    void (*clearLIF_fptr) (struct LIF*);
     /* A pointer to the computeOutput function */
-    void (*computeOutput_fptr) (lif_t*, cfloat_array_t*, spike_array_t*);
+    void (*computeOutput_fptr) (struct LIF*, cfloat_array_t*, spike_array_t*);
 } lif_t;
 
 /* Initializes a pointer to the membrane potential for this layer */

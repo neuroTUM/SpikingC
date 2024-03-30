@@ -28,7 +28,7 @@ void computeOutput(lif_t* layer, cfloat_array_t* In, spike_array_t* Out){
     for(unsigned int i = 0; i < layer->U.size; i += sizeof(spike_t) * 8){
         out = 0;
         spike_t val = Out->ptr[i / (sizeof(spike_t) * 8)];        
-        for(unsigned int j = i; j < min(i + sizeof(spike_t) * 8, layer->U.size); j++){
+        for(unsigned int j = i; j < i + sizeof(spike_t) * 8 && j < layer->U.size; j++){
             if(reset_type[layer->layer_num]){
                 in = BITVALUE(val, j - i);
                 layer->U.ptr[j] = Beta[layer->layer_num] * (layer->U.ptr[j] - in * threshold[layer->layer_num]) + In->ptr[j];
