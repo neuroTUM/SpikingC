@@ -55,7 +55,7 @@ int main(void)
     printf("Predicted class is: %d\n", SNN.predict_fptr(&SNN));
 
     /* Free memory allocated for In */
-    free(In.ptr);
+    //free(In.ptr);
 
     /* Free memory allocated for SNN */
     SNN.clearModel_fptr(&SNN);

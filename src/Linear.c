@@ -1,8 +1,7 @@
 #include "../include/Linear.h"
 
 void clearLinear(linear_t* layer){
-    for(unsigned int i = 0; i < layer->W.rows; i++)
-        free(layer->W.ptr[i]);
+    free(layer->W.ptr);
     layer->W.ptr = NULL;
     layer->B.ptr = NULL;
 }

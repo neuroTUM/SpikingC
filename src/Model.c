@@ -6,17 +6,42 @@
 
 #include "../include/Model.h"
 
-void clearModel(model_t* model){
-    for(unsigned int i = 0; i < NUM_LAYERS; i++){
-        if(strcmp(layer_type[i], "Linear") == 0){
-            model->layers[i].linear_ptr->clearLinear_fptr(model->layers[i].linear_ptr);
+void clearModel(model_t *model)
+{
+    if (model != NULL)
+    {
+        // Iterate through each layer
+        for (unsigned int i = 0; i < NUM_LAYERS; i++)
+        {
+            // Clear Linear layers
+            if (strcmp(layer_type[i], "Linear") == 0 && model->layers[i].linear_ptr != NULL)
+            {
+                if (model->layers[i].linear_ptr->clearLinear_fptr != NULL)
+                {
+                    model->layers[i].linear_ptr->clearLinear_fptr(model->layers[i].linear_ptr);
+                }
+                free(model->layers[i].linear_ptr);
+                model->layers[i].linear_ptr = NULL; // Prevent dangling pointer
+            }
+            // Clear LIF layers
+            else if (strcmp(layer_type[i], "LIF") == 0 && model->layers[i].lif_ptr != NULL)
+            {
+                if (model->layers[i].lif_ptr->clearLIF_fptr != NULL)
+                {
+                    model->layers[i].lif_ptr->clearLIF_fptr(model->layers[i].lif_ptr);
+                }
+                free(model->layers[i].lif_ptr);
+                model->layers[i].lif_ptr = NULL; // Prevent dangling pointer
+            }
         }
-        else if(strcmp(layer_type[i], "LIF") == 0){
-            model->layers[i].lif_ptr->clearLIF_fptr(model->layers[i].lif_ptr);
-        }
+        // Free the array of layers
+        free(model->layers);
+        model->layers = NULL; // Prevent dangling pointer
+
+        // Free the actPred array
+        free(model->actPred);
+        model->actPred = NULL; // Prevent dangling pointer
     }
-    free(model->layers);
-    free(model->actPred);
 }
 
 void resetState(model_t* model){

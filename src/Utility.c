@@ -160,24 +160,63 @@ float **readCSV(const char *filename, int *rows, int *cols)
         return NULL;
     }
 
-    float **data = NULL;
     char line[MAX_LINE_LENGTH];
+    if (!fgets(line, MAX_LINE_LENGTH, file))
+    {
+        // Handle error or empty file
+        fclose(file);
+        return NULL;
+    }
+
+    // Temporarily count columns
+    int colCount = 1; // Starting at one since counting separators
+    for (char *temp = line; *temp; temp++)
+    {
+        if (*temp == ',')
+            colCount++;
+    }
+
+    *cols = colCount; // Assuming cols is correctly passed in
+
+    float **data = NULL;
     *rows = 0;
+
+    rewind(file); // Go back to start to read data again
+
     while (fgets(line, MAX_LINE_LENGTH, file))
     {
         data = realloc(data, (*rows + 1) * sizeof(float *));
-        data[*rows] = malloc(*cols * sizeof(float)); // Assumes 'cols' is set to the correct number of columns
+        if (!data)
+        {
+            // Handle realloc failure
+            *rows = 0;
+            fclose(file);
+            return NULL;
+        }
+
+        data[*rows] = malloc(colCount * sizeof(float));
+        if (!data[*rows])
+        {
+            // Handle malloc failure, cleanup previously allocated rows
+            for (int i = 0; i < *rows; i++)
+                free(data[i]);
+            free(data);
+            *rows = 0;
+            fclose(file);
+            return NULL;
+        }
 
         // Split line into tokens and convert to float
         char *token = strtok(line, ",");
         int col = 0;
-        while (token != NULL)
+        while (token != NULL && col < colCount)
         {
             data[*rows][col++] = atof(token);
             token = strtok(NULL, ",");
         }
         (*rows)++;
     }
+
     fclose(file);
     return data;
 }
