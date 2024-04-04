@@ -20,16 +20,16 @@
 /* Offset type is 'M' for matrices, 'V' for float vectors and 'S' for spikes */
 unsigned int getOffset(unsigned int layer_num, char offsetType, char* str);
 
-/* Returns an array of pointer to different rows of the weight matrix for the particular layer */
+/* Returns an array of pointers to different rows of the weight matrix for a particular layer */
 wfloat_t** returnWeightPtr(unsigned int layer_num);
 
-/* Returns a pointer to the bias vector for the particular layer */
+/* Returns a pointer to the bias vector for a particular layer */
 wfloat_t* returnBiasPtr(unsigned int layer_num);
 
-/* Returns a pointer to the vector of membrane potentials for the particular layer */
+/* Returns a pointer to the vector of membrane potentials for a particular layer */
 cfloat_t* returnMemPotentialPtr(unsigned int layer_num);
 
-/* Returns a pointer to the vector of spikes for the particular layer */
+/* Returns a pointer to the vector of spikes for a particular layer */
 spike_t* returnSpikePtr(unsigned int layer_num);
 
 /* Performs matrix vector multiplication assuming floating point representation */
