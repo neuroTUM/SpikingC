@@ -72,8 +72,10 @@ int main(void)
     if ((dir = opendir(dataTestDirectory)) == NULL)
     {
         perror("Failed to open directory");
-        return;
+        return -1;
     }
+
+
 
     while ((entry = readdir(dir)) != NULL)
     {
@@ -85,15 +87,10 @@ int main(void)
             int trueLabel = extractLabelFromFilename(entry->d_name);
 
             
-            loadInputFromFile(filePath, scratchpad_memory, INPUT_SIZE);
+            loadInputsFromFile(filePath, scrachpad_memory, INPUT_SIZE);
 
-            model_t SNN;               
-            initModel(&SNN);           
-            SNN.resetState_fptr(&SNN); 
+            cfloat_array_t In = {.ptr = scrachpad_memory, .size = INPUT_SIZE};
 
-            cfloat_array_t In = {.ptr = scratchpad_memory, .size = INPUT_SIZE};
-
-            
             SNN.run_fptr(&SNN, &In);
 
             int predictedLabel = SNN.predict_fptr(&SNN);
@@ -105,11 +102,12 @@ int main(void)
             totalPredictions++;
 
             printf("Processed %s: Predicted class = %d, True Label = %d\n", entry->d_name, predictedLabel, trueLabel);
-
             
-            SNN.clearModel_fptr(&SNN);
         }
     }
+
+    SNN.clearModel_fptr(&SNN);
+
     closedir(dir);
 
     if (totalPredictions > 0)

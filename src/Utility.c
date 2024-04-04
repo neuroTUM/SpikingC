@@ -268,3 +268,46 @@ int extractLabelFromFilename(const char *filename)
     int label = atoi(labelStr);
     return label;
 }
+
+/**
+ * Reads input data from a binary file and stores it into the scratchpad memory.
+ * Assumes the binary file contains int16_t data to be converted to cfloat_t.
+ *
+ * @param filePath Path to the binary file to read.
+ * @param scratchpadMemory Pointer to the scratchpad memory where input data should be stored.
+ * @param bufferSize Number of elements to read into the scratchpad memory.
+ */
+void loadInputsFromFile(const char *filePath, cfloat_t *scratchpadMemory, size_t bufferSize)
+{
+    // Open the file for reading in binary mode
+    FILE *file = fopen(filePath, "rb");
+    if (!file)
+    {
+        perror("Could not open the file");
+        return;
+    }
+
+    // Temporary buffer to hold the int16_t data read from the file
+    int16_t temp;
+    // Iterate over the buffer size, reading int16_t values and converting them to cfloat_t
+    for (size_t i = 0; i < bufferSize; ++i)
+    {
+        if (fread(&temp, sizeof(int16_t), 1, file) == 1)
+        {
+            // Convert and store in the scratchpad memory
+            scratchpadMemory[i] = (cfloat_t)temp;
+        }
+        else
+        {
+            // Handle reading error or EOF
+            if (!feof(file))
+            { // Check if the end of the file has been reached
+                fprintf(stderr, "Error reading file before reaching the expected buffer size\n");
+            }
+            break;
+        }
+    }
+
+    // Close the file
+    fclose(file);
+}

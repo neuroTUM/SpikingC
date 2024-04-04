@@ -53,4 +53,6 @@ void freeCSVData(float **data, int rows);
 
 int extractLabelFromFilename(const char *filename);
 
+void loadInputsFromFile(const char *filePath, cfloat_t *scratchpadMemory, size_t bufferSize);
+
 #endif
