@@ -17,6 +17,11 @@ typedef struct LIF{
     void (*clearLIF_fptr) (struct LIF*);
     /* A pointer to the computeOutput function */
     void (*computeOutput_fptr) (struct LIF*, cfloat_array_t*, spike_array_t*);
+
+    #ifdef TEST
+    /* Current time step */
+    unsigned int curr_time_step;
+    #endif
 } lif_t;
 
 /* Initializes a pointer to the membrane potential for this layer */
@@ -27,5 +32,10 @@ void clearLIF(lif_t* layer);
 
 /* Updates the membrane potentials and generates spikes if it is necessary */
 void computeOutput(lif_t* layer, cfloat_array_t* In, spike_array_t* Out);
+
+#ifdef TEST
+/* Tests if membrane potentials and spikes had been calculated correctly */
+void testLIF(lif_t* layer, const spike_array_t* spikes);
+#endif
 
 #endif

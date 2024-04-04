@@ -6,6 +6,61 @@
 
 #include "LIF.h"
 
+#ifdef TEST
+void testLIF(lif_t* layer, const spike_array_t* spikes){
+    
+    int rows, cols;
+    char filename[256];
+
+    /**************************************** Membrane potential ****************************************/
+    sprintf(filename, "../../models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs/mem%u/mem%u_timestep_%u.csv", 
+                      layer->layer_num + 1, layer->layer_num + 1, layer->curr_time_step);
+    
+    float **data = readCSV(filename, &rows, &cols);
+    if (!data || rows < 1)
+    {
+        fprintf(stderr, "Failed to load membrane potentials for timestep %u and layer %u\n", layer->curr_time_step, layer->layer_num);
+        exit(1);
+    }
+
+    for (unsigned int i = 0; i < (unsigned int)cols; i++)
+    {
+        if(fabs(layer->U.ptr[i] - data[0][i]) > PRECISION){
+            fprintf(stderr, "Layer_%u (LIF): Membrane potential value mismatch at position %u and time step %u.\nCorrect value = %f\tCalculated value = %f\n", 
+                             layer->layer_num, i, layer->curr_time_step, data[0][i], layer->U.ptr[i]);
+            exit(1);            
+        }
+    }
+    freeCSVData(data, rows);
+
+    /********************************************* Spikes *********************************************/
+
+    sprintf(filename, "../../models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs/lif%u/lif%u_spikes_timestep_%u.csv", 
+                      layer->layer_num + 1, layer->layer_num + 1, layer->curr_time_step);
+
+    data = readCSV(filename, &rows, &cols);
+    if (!data || rows < 1)
+    {
+        fprintf(stderr, "Failed to load spikes for timestep %u and layer %u\n", layer->curr_time_step, layer->layer_num);
+        exit(1);
+    }
+
+    for (unsigned int i = 0; i < (unsigned int)cols; i++)
+    {
+        if(fabs(spikes->ptr[i] - data[0][i]) > PRECISION){
+            fprintf(stderr, "Layer_%u (LIF): Spike value mismatch at position %u and time step %u.\nCorrect value = %f\tCalculated value = %f\n", 
+                             layer->layer_num, i, layer->curr_time_step, data[0][i], (float)spikes->ptr[i]);
+            exit(1);            
+        }
+    }
+    freeCSVData(data, rows);
+
+    layer->curr_time_step++;
+    if(layer->curr_time_step >= TIME_STEPS)
+        layer->curr_time_step = 0;    
+}
+#endif
+
 void clearLIF(lif_t* layer){
     layer->U.ptr = NULL;
 }
@@ -41,6 +96,10 @@ void computeOutput(lif_t* layer, cfloat_array_t* In, spike_array_t* Out){
         }
         Out->ptr[i / (sizeof(spike_t) * 8)] = out;
     }
+
+    #ifdef TEST
+    testLIF(layer, Out);
+    #endif
 }
 
 void initLIF(lif_t* layer, unsigned int layer_num){
@@ -49,4 +108,8 @@ void initLIF(lif_t* layer, unsigned int layer_num){
     layer->U.size               = layer_size[layer_num];
     layer->clearLIF_fptr        = &clearLIF;
     layer->computeOutput_fptr   = &computeOutput;
+    
+    #ifdef TEST
+    layer->curr_time_step       = 0;
+    #endif
 }

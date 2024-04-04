@@ -25,6 +25,10 @@
 #include <sys/types.h>
 #endif
 
+#ifdef TEST
+#include <math.h>
+#endif
+
 /* General macros */
 #define MAX_STR_LEN 10
 
