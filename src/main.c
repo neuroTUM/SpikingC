@@ -40,9 +40,13 @@ int main(void)
         }
 
         // Assume inputData[0] contains the input for this timestep
+        int cntZeors = 0;
         for (unsigned int j = 0; j < (unsigned int)cols && j < In.size; j++)
         {
             In.ptr[j] = inputData[0][j];
+            if(In.ptr[j] == 0){
+                cntZeors++;
+            }
         }
 
         /* Run the model for one time step */
