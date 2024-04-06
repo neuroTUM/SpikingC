@@ -14,11 +14,12 @@
 #include <stdbool.h>
 
 /* Test related macros */
-// #define TEST
+//#define TEST
 #define LOAD
 #define PRECISION 1e-4
 #define MEASURE_TIME
-//#define DATALOADER
+//#define ONE_PASS_DEBUG
+#define DATALOADER
 
 #ifdef DATALOADER
 #include <dirent.h> // For directory operations

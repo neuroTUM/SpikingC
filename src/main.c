@@ -28,7 +28,8 @@ int main(void)
 
     /* Reset the state */
     SNN.resetState_fptr(&SNN);
-
+    
+    #ifdef ONE_PASS_DEBUG
     char filename[256];
     for (unsigned int i = 0; i < TIME_STEPS; i++)
     {
@@ -67,6 +68,7 @@ int main(void)
 
     /* Free memory allocated for SNN */
     SNN.clearModel_fptr(&SNN);
+    #endif
 
     #ifdef DATALOADER
     const char *dataTestDirectory = PATH_BIN_DATA;
