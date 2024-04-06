@@ -6,6 +6,11 @@
 int main(void)
 {   
 
+    #ifdef MEASURE_TIME
+    clock_t t; 
+    t = clock();
+    #endif
+
     model_t SNN;
     initModel(&SNN);
 
@@ -40,9 +45,13 @@ int main(void)
         }
 
         // Assume inputData[0] contains the input for this timestep
+        int cntZeors = 0;
         for (unsigned int j = 0; j < (unsigned int)cols && j < In.size; j++)
         {
             In.ptr[j] = inputData[0][j];
+            if(In.ptr[j] == 0){
+                cntZeors++;
+            }
         }
 
         /* Run the model for one time step */
@@ -117,6 +126,11 @@ int main(void)
     {
         printf("No .bin files processed.\n");
     }
+    #endif
+
+    #ifdef MEASURE_TIME
+    double time_taken = ((double)t) / CLOCKS_PER_SEC;
+    printf("Execution time in seconds: %f\n", time_taken);
     #endif
 
     return 0;
