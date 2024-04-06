@@ -14,10 +14,11 @@
 #include <stdbool.h>
 
 /* Test related macros */
-//#define TEST
+// #define TEST
 #define LOAD
 #define PRECISION 1e-4
-#define DATALOADER
+#define MEASURE_TIME
+//#define DATALOADER
 
 #ifdef DATALOADER
 #include <dirent.h> // For directory operations
@@ -27,6 +28,10 @@
 
 #ifdef TEST
 #include <math.h>
+#endif
+
+#ifdef MEASURE_TIME
+#include <time.h>
 #endif
 
 /* General macros */
@@ -106,8 +111,5 @@ typedef struct{
     spike_t* ptr;
     unsigned int size;
 } spike_array_t;
-
-#ifdef LOAD
-#endif
 
 #endif
