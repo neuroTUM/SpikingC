@@ -104,7 +104,7 @@ void loadCSVToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned int 
         char *token = strtok(buffer, ",");
         while (token != NULL && count < elements)
         {
-            W[startIdx + count++] = atof(token);
+            W[startIdx + count++] = simple_atof(token);
             token = strtok(NULL, ",");
         }
     }
@@ -124,7 +124,7 @@ void loadCSVToStaticBiasArray(const char *filepath, wfloat_t *B, unsigned int st
     unsigned int index = 0;
     while (fgets(buffer, BUFFER_SIZE, file) && index < size)
     {
-        B[startIdx + index++] = atof(buffer);
+        B[startIdx + index++] = simple_atof(buffer);
     }
     fclose(file);
 }
@@ -211,7 +211,7 @@ float **readCSV(const char *filename, int *rows, int *cols)
         int col = 0;
         while (token != NULL && col < colCount)
         {
-            data[*rows][col++] = atof(token);
+            data[*rows][col++] = simple_atof(token);
             token = strtok(NULL, ",");
         }
         (*rows)++;
@@ -310,4 +310,43 @@ void loadInputsFromFile(const char *filePath, cfloat_t *scratchpadMemory, size_t
 
     // Close the file
     fclose(file);
+}
+
+double simple_atof(const char *str)
+{
+    double value = 0;
+    int sign = 1;
+
+    // Skip whitespace
+    while (isspace(*str))
+        str++;
+
+    // Check for sign
+    if (*str == '+' || *str == '-')
+    {
+        sign = (*str == '-') ? -1 : 1;
+        str++;
+    }
+
+    // Convert integer part
+    while (isdigit(*str))
+    {
+        value = value * 10.0 + (*str - '0');
+        str++;
+    }
+
+    // Convert fractional part
+    if (*str == '.')
+    {
+        double fraction = 0.1;
+        str++;
+        while (isdigit(*str))
+        {
+            value += (*str - '0') * fraction;
+            fraction *= 0.1;
+            str++;
+        }
+    }
+
+    return value * sign;
 }

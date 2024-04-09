@@ -7,6 +7,8 @@
 #ifndef SNNCONFIGCONFIG_H
 #define SNNCONFIG_H
 
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -21,9 +23,10 @@ extern "C" {
 //#define TEST
 #define LOAD
 #define PRECISION 1e-4
-#define MEASURE_TIME
-//#define ONE_PASS_DEBUG
-#define DATALOADER
+//#define MEASURE_TIME
+#define ONE_PASS_DEBUG
+//#define DATALOADER
+
 
 #ifdef DATALOADER
 #include <dirent.h> // For directory operations

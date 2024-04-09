@@ -11,8 +11,8 @@
 extern "C" {
 #endif
 
-
 #include "SNNconfig.h"
+#include <ctype.h>
 #include <math.h>
 
 #define MAX_LINE_LENGTH 10000 // Adjust based on your CSV line length
@@ -59,6 +59,8 @@ void freeCSVData(float **data, int rows);
 int extractLabelFromFilename(const char *filename);
 
 void loadInputsFromFile(const char *filePath, cfloat_t *scratchpadMemory, size_t bufferSize);
+
+double simple_atof(const char *str);
 
 #ifdef __cplusplus
 }
