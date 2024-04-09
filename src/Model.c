@@ -121,17 +121,19 @@ void initModel(model_t* model){
     model->resetState_fptr  = &resetState;
     model->run_fptr         = &run;
     model->predict_fptr     = &predict;
-    model->layers           = malloc(sizeof(layer_instance_t) * NUM_LAYERS);
-    model->actPred          = malloc(sizeof(unsigned int) * layer_size[NUM_LAYERS]);
+    model->layers           = (layer_instance_t*)malloc(sizeof(layer_instance_t) * NUM_LAYERS);
+    model->actPred          = (unsigned*)malloc(sizeof(unsigned int) * layer_size[NUM_LAYERS]);
 
     for(unsigned int i = 0; i < NUM_LAYERS; i++){
         if(strcmp(layer_type[i], "Linear") == 0){
-            model->layers[i].linear_ptr = malloc(sizeof(linear_t));
+            model->layers[i].linear_ptr = (linear_t*)malloc(sizeof(linear_t));
             initLinear(model->layers[i].linear_ptr, i);
         }
         else if(strcmp(layer_type[i], "LIF") == 0){
-            model->layers[i].linear_ptr = malloc(sizeof(lif_t));
+            model->layers[i].linear_ptr = (linear_t*)malloc(sizeof(lif_t));
             initLIF(model->layers[i].lif_ptr, i);
         }
     }
 }
+
+

@@ -50,3 +50,8 @@ notebooks/tmp
 data/
 
 build/
+SpikingC.prx
+SpikingC.prxui
+Debug/
+Release/
+Release_LLVM_full

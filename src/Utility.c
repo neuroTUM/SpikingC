@@ -2,7 +2,7 @@
 
 #define BUFFER_SIZE 30055
 
-unsigned int getOffset(unsigned int layer_num, char offset_type, char* str){
+unsigned int getOffset(unsigned int layer_num, char offset_type, const char* str){
     unsigned int offset = 0;
 
     for(unsigned int i = 0; i < layer_num; i++){
@@ -25,7 +25,7 @@ unsigned int getOffset(unsigned int layer_num, char offset_type, char* str){
 
 wfloat_t** returnWeightPtr(unsigned int layer_num){
     wfloat_t** ptr;
-    ptr = malloc(sizeof(wfloat_t*) * layer_size[layer_num + 1]);
+    ptr = (wfloat_t **)malloc(sizeof(wfloat_t*) * layer_size[layer_num + 1]);
 
     for(unsigned int i = 0; i < layer_size[layer_num + 1]; i++){
         ptr[i] = &W[i * layer_size[layer_num] + getOffset(layer_num, 'M', "Linear")];
@@ -185,7 +185,7 @@ float **readCSV(const char *filename, int *rows, int *cols)
 
     while (fgets(line, MAX_LINE_LENGTH, file))
     {
-        data = realloc(data, (*rows + 1) * sizeof(float *));
+        data = (float **)realloc(data, (*rows + 1) * sizeof(float *));
         if (!data)
         {
             // Handle realloc failure
@@ -194,7 +194,7 @@ float **readCSV(const char *filename, int *rows, int *cols)
             return NULL;
         }
 
-        data[*rows] = malloc(colCount * sizeof(float));
+        data[*rows] = (float*)malloc(colCount * sizeof(float));
         if (!data[*rows])
         {
             // Handle malloc failure, cleanup previously allocated rows

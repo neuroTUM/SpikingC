@@ -23,7 +23,7 @@ extern "C" {
 
 /* Returns offsets for pointer positioning */
 /* Offset type is 'M' for matrices, 'V' for float vectors and 'S' for spikes */
-unsigned int getOffset(unsigned int layer_num, char offsetType, char* str);
+unsigned int getOffset(unsigned int layer_num, char offsetType, const char* str);
 
 /* Returns an array of pointers to different rows of the weight matrix for a particular layer */
 wfloat_t** returnWeightPtr(unsigned int layer_num);
