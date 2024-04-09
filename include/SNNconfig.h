@@ -7,6 +7,10 @@
 #ifndef SNNCONFIGCONFIG_H
 #define SNNCONFIG_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Common includes */
 #include <stdio.h>
 #include <stdlib.h>
@@ -112,5 +116,9 @@ typedef struct{
     spike_t* ptr;
     unsigned int size;
 } spike_array_t;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

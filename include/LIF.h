@@ -7,6 +7,10 @@
 #ifndef LIF_H
 #define LIF_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "Utility.h"
 
 /* A structure holding all relevant data for LIF layers */
@@ -36,6 +40,10 @@ void computeOutput(lif_t* layer, cfloat_array_t* In, spike_array_t* Out);
 #ifdef TEST
 /* Tests if membrane potentials and spikes had been calculated correctly */
 void testLIF(lif_t* layer, const spike_array_t* spikes);
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

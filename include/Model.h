@@ -7,6 +7,10 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "LIF.h"
 #include "Linear.h"
 
@@ -55,5 +59,9 @@ void run(model_t*, cfloat_array_t*);
 
 /* Predicts the output based on the active prediction arrays */
 unsigned int predict(model_t*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

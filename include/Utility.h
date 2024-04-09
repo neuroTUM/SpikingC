@@ -7,6 +7,11 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #include "SNNconfig.h"
 #include <math.h>
 
@@ -54,5 +59,9 @@ void freeCSVData(float **data, int rows);
 int extractLabelFromFilename(const char *filename);
 
 void loadInputsFromFile(const char *filePath, cfloat_t *scratchpadMemory, size_t bufferSize);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

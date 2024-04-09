@@ -7,6 +7,10 @@
 #ifndef LINEAR_H
 #define LINEAR_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "Utility.h"
 
 /* A structure holding all relevant data for linear layers */
@@ -25,5 +29,9 @@ void initLinear(linear_t* layer, unsigned int layer_num);
 
 /* Deallocates memory for weights and sets all pointers to NULL */
 void clearLinear(linear_t* layer);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
