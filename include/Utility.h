@@ -1,9 +1,3 @@
-/*
-    Author's name: Aleksa Stojkovic
-    Date of creation: 27.3.2024
-    Description: A set of commonly used functions(mainly matrix multiplication and pointer manipulations) 
-*/
-
 #ifndef UTILITY_H
 #define UTILITY_H
 

@@ -1,9 +1,3 @@
-/*
-    Author's name: Aleksa Stojkovic
-    Date of creation: 30.3.2024
-    Description: The accompanying source file necessary for defining global variables 
-*/
-
 #include "../include/SNNconfig.h"
 
 unsigned int    layer_size[NUM_LAYERS + 1]          = {INPUT_SIZE, L1_SIZE_OUT, LIF1_SIZE, 

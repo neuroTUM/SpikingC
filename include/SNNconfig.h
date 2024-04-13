@@ -1,9 +1,3 @@
-/*
-    Author's name: Aleksa Stojkovic
-    Date of creation: 27.3.2024
-    Description: Network configuration parameters 
-*/
-
 #ifndef SNNCONFIGCONFIG_H
 #define SNNCONFIG_H
 

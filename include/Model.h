@@ -1,9 +1,3 @@
-/*
-    Author's name: Aleksa Stojkovic
-    Date of creation: 28.3.2024
-    Description: A set of structures and functions used to create models containing linear and LIF layers
-*/
-
 #ifndef MODEL_H
 #define MODEL_H
 

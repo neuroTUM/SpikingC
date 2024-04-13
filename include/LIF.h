@@ -1,9 +1,3 @@
-/*
-    Author's name: Aleksa Stojkovic
-    Date of creation: 27.3.2024
-    Description: A set of structures and functions used to describe and perform computations for a LIF layer 
-*/
-
 #ifndef LIF_H
 #define LIF_H
 

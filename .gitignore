@@ -50,8 +50,13 @@ notebooks/tmp
 data/
 
 build/
+
+# ASIP files
 SpikingC.prx
 SpikingC.prxui
 Debug/
 Release/
 Release_LLVM_full
+Native/*
+.vscode/*
+chess.log
