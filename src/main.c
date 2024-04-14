@@ -34,11 +34,11 @@ int main(void)
     for (unsigned int i = 0; i < TIME_STEPS; i++)
     {
         // Construct the filename for the current timestep
-        sprintf(filename, "../../models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs/input/inputs_timestep_%u.csv", i);
+        sprintf(filename, "../../models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs/input/inputs_timestep_%u.bin", i);
 
         // Load the data for this time step
         int rows, cols;
-        float **inputData = readCSV(filename, &rows, &cols);
+        float **inputData = readBinary(filename, &rows, &cols);
         if (!inputData || rows < 1)
         {
             fprintf(stderr, "Failed to load input data for timestep %u\n", i);
@@ -58,7 +58,7 @@ int main(void)
         /* Run the model for one time step */
         SNN.run_fptr(&SNN, &In);
 
-        freeCSVData(inputData, rows);
+        freeBinaryData(inputData, rows);
     }
 
     printf("Predicted class is: %d\n", SNN.predict_fptr(&SNN));

@@ -38,17 +38,17 @@ void matrixVectorMul(wfloat_2d_array_t* W, wfloat_array_t* B, cfloat_array_t* In
 /* Performs matrix vector multiplication assuming floating point representation for weights and binary for spikes */
 void matrixVectorMulSparse(wfloat_2d_array_t* W, wfloat_array_t* B, spike_array_t* In, cfloat_array_t* Out);
 
-void loadCSVToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned int startIdx, unsigned int elements);
+void loadBinaryToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned int startIdx, unsigned int elements);
 
-void loadCSVToStaticBiasArray(const char *filepath, wfloat_t *B, unsigned int startIdx, unsigned int size);
+void loadBinaryToStaticBiasArray(const char *filepath, wfloat_t *B, unsigned int startIdx, unsigned int size);
 
 void loadStaticWeightsAndBiases();
 
-float **readCSV(const char *filename, int *rows, int *cols);
+float **readBinary(const char *filename, int *rows, int *cols);
 
 int compareOutputs(float *computed, float *expected, int size);
 
-void freeCSVData(float **data, int rows);
+void freeBinaryData(float **data, int rows);
 
 int extractLabelFromFilename(const char *filename);
 

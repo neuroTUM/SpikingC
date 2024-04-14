@@ -51,12 +51,12 @@ extern "C" {
 #define L3_SIZE_OUT 10
 #define LIF3_SIZE   10
 
-#define PATH_WEIGHTS_FC1    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc1_weight_weights.csv"
-#define PATH_BIAS_FC1       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc1_bias.csv"
-#define PATH_WEIGHTS_FC2    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc2_weight_weights.csv"
-#define PATH_BIAS_FC2       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc2_bias.csv"
-#define PATH_WEIGHTS_FC3    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc3_weight_weights.csv"
-#define PATH_BIAS_FC3       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc3_bias.csv"
+#define PATH_WEIGHTS_FC1    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc1_weight_weights.bin"
+#define PATH_BIAS_FC1       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc1_bias.bin"
+#define PATH_WEIGHTS_FC2    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc2_weight_weights.bin"
+#define PATH_BIAS_FC2       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc2_bias.bin"
+#define PATH_WEIGHTS_FC3    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc3_weight_weights.bin"
+#define PATH_BIAS_FC3       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc3_bias.bin"
 
 /* Floating point representation for network elements like membrane potentials, thresholds and beta values */
 typedef double cfloat_t;

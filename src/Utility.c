@@ -88,72 +88,85 @@ void matrixVectorMulSparse(wfloat_2d_array_t* W, wfloat_array_t* B, spike_array_
     }
 }
 
-void loadCSVToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned int startIdx, unsigned int elements)
+void loadBinaryToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned int startIdx, unsigned int elements)
 {
-    FILE *file = fopen(filepath, "r");
+    FILE *file = fopen(filepath, "rb"); // Open the file in binary read mode
     if (!file)
     {
         perror("Failed to open file");
         return;
     }
 
-    char buffer[BUFFER_SIZE];
-    unsigned int count = 0;
-    while (fgets(buffer, BUFFER_SIZE, file) && count < elements)
-    {
-        char *token = strtok(buffer, ",");
-        while (token != NULL && count < elements)
-        {
-            W[startIdx + count++] = simple_atof(token);
-            token = strtok(NULL, ",");
-        }
+    // Use fseek to skip to the start index if necessary. Here, we assume each wfloat_t is a fixed size, e.g., sizeof(wfloat_t).
+    if (fseek(file, startIdx * sizeof(wfloat_t), SEEK_SET) != 0) {
+        perror("Failed to seek in file");
+        fclose(file);
+        return;
     }
+
+    // Read the elements directly into the array at the specified position.
+    size_t readItems = fread(W + startIdx, sizeof(wfloat_t), elements, file);
+    if (readItems < elements)
+    {
+        fprintf(stderr, "Failed to read enough elements, expected %u, got %zu\n", elements, readItems);
+    }
+
     fclose(file);
 }
 
-void loadCSVToStaticBiasArray(const char *filepath, wfloat_t *B, unsigned int startIdx, unsigned int size)
+void loadBinaryToStaticBiasArray(const char *filepath, wfloat_t *B, unsigned int startIdx, unsigned int size)
 {
-    FILE *file = fopen(filepath, "r");
+    FILE *file = fopen(filepath, "rb");
     if (!file)
     {
         perror("Failed to open file");
         return;
     }
 
-    char buffer[BUFFER_SIZE];
-    unsigned int index = 0;
-    while (fgets(buffer, BUFFER_SIZE, file) && index < size)
-    {
-        B[startIdx + index++] = simple_atof(buffer);
+    // Use fseek to skip to the start index if necessary.
+    if (fseek(file, startIdx * sizeof(wfloat_t), SEEK_SET) != 0) {
+        perror("Failed to seek in file");
+        fclose(file);
+        return;
     }
+
+    // Read the size elements directly into the bias array at the specified position.
+    size_t readItems = fread(B + startIdx, sizeof(wfloat_t), size, file);
+    if (readItems < size)
+    {
+        fprintf(stderr, "Failed to read enough elements, expected %u, got %zu\n", size, readItems);
+    }
+
     fclose(file);
 }
+
 
 void loadStaticWeightsAndBiases()
 {
     // Adjust file paths and array indices as needed
-    loadCSVToStaticWeightArray(PATH_WEIGHTS_FC1, W, 0, INPUT_SIZE * L1_SIZE_OUT);
-    loadCSVToStaticBiasArray(PATH_BIAS_FC1, B, 0, L1_SIZE_OUT);
+    loadBinaryToStaticWeightArray(PATH_WEIGHTS_FC1, W, 0, INPUT_SIZE * L1_SIZE_OUT);
+    loadBinaryToStaticBiasArray(PATH_BIAS_FC1, B, 0, L1_SIZE_OUT);
 
     // Calculate start index for each subsequent layer based on the previous layers' sizes
     unsigned int wIdx2 = INPUT_SIZE * L1_SIZE_OUT;
     unsigned int bIdx2 = L1_SIZE_OUT;
 
-    loadCSVToStaticWeightArray(PATH_WEIGHTS_FC2, W, wIdx2, LIF1_SIZE * L2_SIZE_OUT);
-    loadCSVToStaticBiasArray(PATH_BIAS_FC2, B, bIdx2, L2_SIZE_OUT);
+    loadBinaryToStaticWeightArray(PATH_WEIGHTS_FC2, W, wIdx2, LIF1_SIZE * L2_SIZE_OUT);
+    loadBinaryToStaticBiasArray(PATH_BIAS_FC2, B, bIdx2, L2_SIZE_OUT);
 
     // And so on for each layer, adjusting the indices accordingly
     unsigned int wIdx3 = wIdx2 + LIF1_SIZE * L2_SIZE_OUT;
     unsigned int bIdx3 = bIdx2 + L2_SIZE_OUT;
 
-    loadCSVToStaticWeightArray(PATH_WEIGHTS_FC3, W, wIdx3, LIF2_SIZE * L3_SIZE_OUT);
-    loadCSVToStaticBiasArray(PATH_BIAS_FC3, B, bIdx3, L3_SIZE_OUT);
+    loadBinaryToStaticWeightArray(PATH_WEIGHTS_FC3, W, wIdx3, LIF2_SIZE * L3_SIZE_OUT);
+    loadBinaryToStaticBiasArray(PATH_BIAS_FC3, B, bIdx3, L3_SIZE_OUT);
 }
 
+
 // Function to read CSV file into a 2D array
-float **readCSV(const char *filename, int *rows, int *cols)
+float **readBinary(const char *filename, int *rows, int *cols)
 {
-    FILE *file = fopen(filename, "r");
+    FILE *file = fopen(filename, "rb");
     if (!file)
     {
         perror("Failed to open file");
@@ -234,7 +247,7 @@ int compareOutputs(float *computed, float *expected, int size)
     return -1; // No mismatch found
 }
 
-void freeCSVData(float **data, int rows)
+void freeBinaryData(float **data, int rows)
 {
     for (int i = 0; i < rows; i++)
     {

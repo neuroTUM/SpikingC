@@ -10,7 +10,7 @@ void testLIF(lif_t* layer, const spike_array_t* spikes){
     sprintf(filename, "../../models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs/mem%u/mem%u_timestep_%u.csv", 
                       (layer->layer_num / 2) + 1, (layer->layer_num / 2) + 1, layer->curr_time_step);
     
-    float **data = readCSV(filename, &rows, &cols);
+    float **data = readBinary(filename, &rows, &cols);
     if (!data || rows < 1)
     {
         fprintf(stderr, "Failed to load membrane potentials for timestep %u and LIF layer %u\n", layer->curr_time_step, (layer->layer_num / 2) + 1);
@@ -32,7 +32,7 @@ void testLIF(lif_t* layer, const spike_array_t* spikes){
     sprintf(filename, "../../models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs/lif%u/lif%u_spikes_timestep_%u.csv", 
                       (layer->layer_num / 2) + 1, (layer->layer_num / 2) + 1, layer->curr_time_step);
 
-    data = readCSV(filename, &rows, &cols);
+    data = readBinary(filename, &rows, &cols);
     if (!data || rows < 1)
     {
         fprintf(stderr, "Failed to load spikes for timestep %u and LIF layer %u\n", layer->curr_time_step, (layer->layer_num / 2) + 1);
@@ -52,7 +52,7 @@ void testLIF(lif_t* layer, const spike_array_t* spikes){
             }            
         }
     }
-    freeCSVData(data, rows);
+    freeBinaryData(data, rows);
 
     layer->curr_time_step++;
     if(layer->curr_time_step >= TIME_STEPS)
