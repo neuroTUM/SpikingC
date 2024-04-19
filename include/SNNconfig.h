@@ -1,13 +1,5 @@
-/*
-    Author's name: Aleksa Stojkovic
-    Date of creation: 27.3.2024
-    Description: Network configuration parameters 
-*/
-
 #ifndef SNNCONFIGCONFIG_H
 #define SNNCONFIG_H
-
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,9 +11,10 @@ extern "C" {
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include <stdint.h>
 
 /* Test related macros */
-//#define TEST
+#define TEST
 #define LOAD
 #define PRECISION 1e-4
 //#define MEASURE_TIME
@@ -31,7 +24,6 @@ extern "C" {
 
 #ifdef DATALOADER
 #include <dirent.h> // For directory operations
-#include <stdint.h> // For int16_t type
 #include <sys/types.h>
 #endif
 
@@ -78,7 +70,6 @@ extern unsigned int layer_size[NUM_LAYERS + 1];
 extern char         layer_type[NUM_LAYERS][MAX_STR_LEN];
 extern cfloat_t     Beta[NUM_LAYERS];
 extern cfloat_t     threshold[NUM_LAYERS];
-extern bool         reset_type[NUM_LAYERS];
 
 /* Statically allocated memory for weights in row major order */
 extern wfloat_t W[INPUT_SIZE * L1_SIZE_OUT + 

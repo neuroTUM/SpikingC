@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/target/Debug/SpikingC",
             "args": [],
-            "stopAtEntry": true,
+            "stopAtEntry": false,
             "cwd": "${workspaceFolder}/target/Debug/",
             "environment": [],
             "externalConsole": false,

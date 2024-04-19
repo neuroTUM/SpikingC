@@ -16,7 +16,7 @@ int main(void)
 
     cfloat_array_t In;
     In.size = INPUT_SIZE;
-    In.ptr = scrachpad_memory; // I have the feeling that this should be declared inside of the for loop like we did in the cpp version
+    In.ptr = scrachpad_memory;
     if (!In.ptr)
     {
         perror("Failed to allocate memory for input");

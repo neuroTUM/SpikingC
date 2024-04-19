@@ -269,14 +269,6 @@ int extractLabelFromFilename(const char *filename)
     return label;
 }
 
-/**
- * Reads input data from a binary file and stores it into the scratchpad memory.
- * Assumes the binary file contains int16_t data to be converted to cfloat_t.
- *
- * @param filePath Path to the binary file to read.
- * @param scratchpadMemory Pointer to the scratchpad memory where input data should be stored.
- * @param bufferSize Number of elements to read into the scratchpad memory.
- */
 void loadInputsFromFile(const char *filePath, cfloat_t *scratchpadMemory, size_t bufferSize)
 {
     // Open the file for reading in binary mode

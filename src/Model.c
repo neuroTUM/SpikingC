@@ -1,9 +1,3 @@
-/*
-    Author's name: Aleksa Stojkovic
-    Date of creation: 28.3.2024
-    Description: -
-*/
-
 #include "../include/Model.h"
 
 void clearModel(model_t *model)

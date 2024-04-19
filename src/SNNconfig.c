@@ -1,9 +1,3 @@
-/*
-    Author's name: Aleksa Stojkovic
-    Date of creation: 30.3.2024
-    Description: The accompanying source file necessary for defining global variables 
-*/
-
 #include "../include/SNNconfig.h"
 
 unsigned int    layer_size[NUM_LAYERS + 1]          = {INPUT_SIZE, L1_SIZE_OUT, LIF1_SIZE, 
@@ -12,7 +6,6 @@ unsigned int    layer_size[NUM_LAYERS + 1]          = {INPUT_SIZE, L1_SIZE_OUT, 
 char            layer_type[NUM_LAYERS][MAX_STR_LEN] = {"Linear", "LIF", "Linear", "LIF", "Linear", "LIF"};
 cfloat_t        Beta[NUM_LAYERS]                    = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5};
 cfloat_t        threshold[NUM_LAYERS]               = {0, 2.5, 0, 8.0, 0, 4.0};
-bool            reset_type[NUM_LAYERS]              = {true, true, true, true, true, true};
 wfloat_t        W[INPUT_SIZE * L1_SIZE_OUT  + 
                   LIF1_SIZE * L2_SIZE_OUT   +
                   LIF2_SIZE * L3_SIZE_OUT];

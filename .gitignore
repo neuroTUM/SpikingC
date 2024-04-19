@@ -55,3 +55,6 @@ SpikingC.prxui
 Debug/
 Release/
 Release_LLVM_full
+.vscode/
+Naive/
+chess.log

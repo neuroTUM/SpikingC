@@ -1,9 +1,3 @@
-/*
-    Author's name: Aleksa Stojkovic
-    Date of creation: 28.3.2024
-    Description: A set of structures and functions used to create models containing linear and LIF layers
-*/
-
 #ifndef MODEL_H
 #define MODEL_H
 
@@ -45,19 +39,40 @@ typedef struct Model{
     unsigned int (*predict_fptr) (struct Model*);
 } model_t;
 
-/* Allocates memory for each layer and initializes the necessary structures */
+/**
+ * Allocates memory for each layer and initializes the necessary structures.
+ * @param model A pointer to a structure representing a model.
+ * @return Nothing is returned.
+ */
 void initModel(model_t*);
 
-/* Deallocates previously allocated memory */
+/**
+ * Deallocates previously allocated memory.
+ * @param model A pointer to a structure representing a model.
+ * @return Nothing is returned.
+ */
 void clearModel(model_t*);
 
-/* Resets all the membrane potentials, spikes and active predictions */
+/**
+ * Resets all the membrane potentials, spikes and active predictions.
+ * @param model A pointer to a structure representing a model.
+ * @return Nothing is returned.
+ */
 void resetState(model_t*);
 
-/* Implements the forward path for one time step */
+/**
+ * Implements the forward path for one time step.
+ * @param model A pointer to a structure representing a model.
+ * @param In A structure containing information for accessing input data.
+ * @return Nothing is returned.
+ */
 void run(model_t*, cfloat_array_t*);
 
-/* Predicts the output based on the active prediction arrays */
+/**
+ * Predicts the output based on the active prediction arrays.
+ * @param model A pointer to a structure representing a model.
+ * @return Nothing is returned.
+ */
 unsigned int predict(model_t*);
 
 #ifdef __cplusplus

@@ -1,9 +1,3 @@
-/*
-    Author's name: Aleksa Stojkovic
-    Date of creation: 27.3.2024
-    Description: A set of structures and functions used to describe and perform computations for a LIF layer 
-*/
-
 #ifndef LIF_H
 #define LIF_H
 
@@ -28,17 +22,38 @@ typedef struct LIF{
     #endif
 } lif_t;
 
-/* Initializes a pointer to the membrane potential for this layer */
+/**
+ * Initializes all fields in a structure used to represent a LIF layer.
+ * Pointer for membrane potentials will have the right value after the execution of this function.
+ * @param layer A pointer to a structure representing a LIF layer.
+ * @param layer_num The current layer number. The first layers is always marked with 0.
+ * @return Nothing is returned.
+ */
 void initLIF(lif_t* layer, unsigned int layer_num);
 
-/* Sets the pointer to the membrane potential to NULL */
+/**
+ * Sets the pointer to the membrane potential to NULL.
+ * @param layer A pointer to a structure representing a LIF layer.
+ * @return Nothing is returned.
+ */
 void clearLIF(lif_t* layer);
 
-/* Updates the membrane potentials and generates spikes if it is necessary */
+/**
+ * Updates the membrane potentials and generates spikes if it is necessary.
+ * @param layer A pointer to a structure representing a LIF layer.
+ * @param In A structure containing the pointer to the first element of the input vector consisting of floats used for this layer and its dimensions.
+ * @param Out A structure containing the pointer to the first element of the array of spikes where outputs will be written.
+ * @return Nothing is returned.
+ */
 void computeOutput(lif_t* layer, cfloat_array_t* In, spike_array_t* Out);
 
 #ifdef TEST
-/* Tests if membrane potentials and spikes had been calculated correctly */
+/**
+ * Tests if membrane potentials and spikes had been calculated correctly.
+ * @param layer A pointer to a structure representing a LIF layer.
+ * @param spikes A structure containing a pointer to an array of spikes that have to be evaluated for correctenss.
+ * @return Nothing is returned.
+ */
 void testLIF(lif_t* layer, const spike_array_t* spikes);
 #endif
 
