@@ -14,12 +14,11 @@ extern "C" {
 #include <stdint.h>
 
 /* Test related macros */
-#define TEST
-#define LOAD
+//#define TEST
 #define PRECISION 1e-4
 //#define MEASURE_TIME
-#define ONE_PASS_DEBUG
-//#define DATALOADER
+//#define ONE_PASS_DEBUG
+#define DATALOADER
 
 
 #ifdef DATALOADER
@@ -49,11 +48,11 @@ extern "C" {
 #define L3_SIZE_OUT 10
 #define LIF3_SIZE   10
 
-#define PATH_WEIGHTS_FC1    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc1_weight_weights.csv"
+#define PATH_WEIGHTS_FC1    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc1_weights.csv"
 #define PATH_BIAS_FC1       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc1_bias.csv"
-#define PATH_WEIGHTS_FC2    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc2_weight_weights.csv"
+#define PATH_WEIGHTS_FC2    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc2_weights.csv"
 #define PATH_BIAS_FC2       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc2_bias.csv"
-#define PATH_WEIGHTS_FC3    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc3_weight_weights.csv"
+#define PATH_WEIGHTS_FC3    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc3_weights.csv"
 #define PATH_BIAS_FC3       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc3_bias.csv"
 
 /* Floating point representation for network elements like membrane potentials, thresholds and beta values */
