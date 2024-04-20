@@ -16,7 +16,7 @@ extern "C" {
 /* Test related macros */
 //#define TEST
 #define PRECISION 1e-4
-//#define MEASURE_TIME
+#define MEASURE_TIME
 //#define ONE_PASS_DEBUG
 #define DATALOADER
 
@@ -39,6 +39,13 @@ extern "C" {
 
 /* Macros used for defining layer parameters and inputs */
 #define TIME_STEPS  31
+#define CHANNELS     2
+#define HEIGHT      34
+#define WIDTH       34
+
+#define DATA_POINTS_PER_TIMESTEP (CHANNELS * HEIGHT * WIDTH) // Total data points per timestep
+#define INPUT_STEP_SIZE (CHANNELS * HEIGHT * WIDTH * sizeof(int16_t))
+
 #define NUM_LAYERS  6
 #define INPUT_SIZE  2312
 #define L1_SIZE_OUT 2312 / 4

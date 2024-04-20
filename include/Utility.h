@@ -111,6 +111,10 @@ int extractLabelFromFilename(const char *filename);
  */
 void loadInputsFromFile(const char *filePath, cfloat_t *scratchpadMemory, size_t bufferSize);
 
+void loadTimestepFromFile(FILE *file, cfloat_t *scratchpadMemory, size_t timestepIndex);
+
+void clearScratchpadMemory(cfloat_t *scratchpadMemory);
+
 double simple_atof(const char *str);
 
 #ifdef __cplusplus

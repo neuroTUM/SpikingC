@@ -1,7 +1,7 @@
 #include "../include/Model.h"
 #include "../include/Utility.h"
 
-#define PATH_BIN_DATA "../../tests/NMNIST_testset_bin"
+#define PATH_BIN_DATA "/home/copparihollmann/neuroTUM/NMNIST/"
 
 int main(void)
 {   
@@ -95,12 +95,23 @@ int main(void)
 
             int trueLabel = extractLabelFromFilename(entry->d_name);
 
+            FILE *file = fopen(filePath, "rb");
+            if (!file)
+            {
+                perror("Failed to open file");
+                return -1;
+            }  
+
+            for (unsigned int i = 0; i < TIME_STEPS; i++)
+            {
+                loadTimestepFromFile(file, scrachpad_memory, i);
+                SNN.run_fptr(&SNN, &In);
+                
+            }
             
-            loadInputsFromFile(filePath, scrachpad_memory, INPUT_SIZE);
+            //loadInputsFromFile(filePath, scrachpad_memory, INPUT_SIZE);
 
-            cfloat_array_t In = {.ptr = scrachpad_memory, .size = INPUT_SIZE};
-
-            SNN.run_fptr(&SNN, &In);
+            //SNN.run_fptr(&SNN, &In);
 
             int predictedLabel = SNN.predict_fptr(&SNN);
 
@@ -112,6 +123,10 @@ int main(void)
 
             printf("Processed %s: Predicted class = %d, True Label = %d\n", entry->d_name, predictedLabel, trueLabel);
             
+            fclose(file);
+
+            /* Reset the state */
+            SNN.resetState_fptr(&SNN);
         }
     }
 

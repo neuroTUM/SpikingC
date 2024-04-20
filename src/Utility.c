@@ -304,6 +304,36 @@ void loadInputsFromFile(const char *filePath, cfloat_t *scratchpadMemory, size_t
     fclose(file);
 }
 
+void loadTimestepFromFile(FILE *file, cfloat_t *scratchpadMemory, size_t timestepIndex)
+{
+    size_t offset = timestepIndex * INPUT_STEP_SIZE;
+    fseek(file, offset, SEEK_SET);
+
+    int16_t temp;
+    for (size_t i = 0; i < DATA_POINTS_PER_TIMESTEP; ++i)
+    {
+        if (fread(&temp, sizeof(int16_t), 1, file) == 1)
+        {
+            scratchpadMemory[i] = (cfloat_t)temp;
+        }
+        else
+        {
+            if (!feof(file))
+            {
+                fprintf(stderr, "Error reading file at timestep %zu\n", timestepIndex);
+            }
+            break;
+        }
+    }
+}
+
+void clearScratchpadMemory(cfloat_t *scratchpadMemory)
+{
+    // If the scratchpadMemory was dynamically allocated:
+    free(scratchpadMemory);
+    scratchpadMemory = NULL; // Set pointer to NULL after freeing
+}
+
 double simple_atof(const char *str)
 {
     double value = 0;
