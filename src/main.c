@@ -1,8 +1,6 @@
 #include "../include/Model.h"
 #include "../include/Utility.h"
 
-#define PATH_BIN_DATA "/home/copparihollmann/neuroTUM/NMNIST/"
-
 int main(void)
 {   
 

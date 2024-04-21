@@ -61,12 +61,13 @@ extern "C" {
 #define PATH_BIAS_FC2       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc2_bias.csv"
 #define PATH_WEIGHTS_FC3    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc3_weights.csv"
 #define PATH_BIAS_FC3       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc3_bias.csv"
+#define PATH_BIN_DATA       "../../tests/NMNIST_testset_bin/"
 
 /* Floating point representation for network elements like membrane potentials, thresholds and beta values */
-typedef double cfloat_t;
+typedef float cfloat_t;
 
 /* Floating point representation for network parameters */
-typedef double wfloat_t;
+typedef float wfloat_t;
 
 /* Data type used for representing spike data */
 typedef unsigned char spike_t;
