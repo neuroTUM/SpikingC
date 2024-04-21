@@ -247,6 +247,21 @@ void clearScratchpadMemory(cfloat_t *scratchpadMemory);
  */
 double simple_atof(const char *str);
 
+/**
+ * Loads input data from a binary file directly into the provided memory buffer.
+ * Assumes the binary file contains float data (as used by your model).
+ *
+ * @param filename The path to the binary input file.
+ * @param buffer The memory buffer to load data into.
+ * @param size The number of float elements expected in the buffer.
+ * @return 1 on success, 0 on failure.
+ */
+int loadBinaryInputData(const char *filename, cfloat_t *buffer, size_t size);
+
+float *loadBinaryFloatData(const char *filename, size_t size);
+
+spike_t *loadBinarySpikeData(const char *filename, size_t size);
+
 #ifdef __cplusplus
 }
 #endif

@@ -16,9 +16,10 @@ extern "C" {
 /* Test related macros */
 //#define TEST
 #define PRECISION 1e-4
-#define MEASURE_TIME
-//#define ONE_PASS_DEBUG
-#define DATALOADER
+//#define MEASURE_TIME
+#define ONE_PASS_DEBUG
+#define BINARY_IMPLEMENTATION
+//#define DATALOADER
 //#define PRINT_WnB
 
 
@@ -71,10 +72,10 @@ extern "C" {
 #define PATH_BIAS_FC3_BIN       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc3_bias.bin"
 
 /* Floating point representation for network elements like membrane potentials, thresholds and beta values */
-typedef double cfloat_t;
+typedef float cfloat_t;
 
 /* Floating point representation for network parameters */
-typedef double wfloat_t;
+typedef float wfloat_t;
 
 /* Data type used for representing spike data */
 typedef unsigned char spike_t;

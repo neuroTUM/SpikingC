@@ -1,6 +1,8 @@
 #include "../include/LIF.h"
 
 #ifdef TEST
+
+#ifndef BINARY_IMPLEMENTATION
 void testLIF(lif_t* layer, const spike_array_t* spikes){
     
     int rows, cols;
@@ -58,6 +60,72 @@ void testLIF(lif_t* layer, const spike_array_t* spikes){
     if(layer->curr_time_step >= TIME_STEPS)
         layer->curr_time_step = 0;    
 }
+#endif
+
+#ifdef BINARY_IMPLEMENTATION
+void testLIF(lif_t *layer, const spike_array_t *spikes)
+{
+
+    //int rows, cols;
+    char filename[256];
+
+    /**************************************** Membrane potential ****************************************/
+    sprintf(filename, "../../models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs_binary/mem%u/mem%u_timestep_%u.bin",
+            (layer->layer_num / 2) + 1, (layer->layer_num / 2) + 1, layer->curr_time_step);
+
+    float *memPotentials = loadBinaryFloatData(filename, layer->U.size);
+    if (!memPotentials)
+    {
+        fprintf(stderr, "Failed to load membrane potentials for timestep %u and LIF layer %u\n", layer->curr_time_step,
+                (layer->layer_num / 2) + 1);
+        exit(1);
+    }
+
+    for (unsigned int i = 0; i < layer->U.size; i++)
+    {
+        if (fabs(layer->U.ptr[i] - memPotentials[i]) > PRECISION)
+        {
+            fprintf(stderr,
+                    "Layer_%u (LIF): Membrane potential value mismatch at position %u and time step %u.\nCorrect value "
+                    "= %f\tCalculated value = %f\n",
+                    layer->layer_num, i, layer->curr_time_step, memPotentials[i], layer->U.ptr[i]);
+            exit(1);
+        }
+    }
+    free(memPotentials);
+
+    /********************************************* Spikes *********************************************/
+
+    sprintf(filename, "../../models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs_binary/lif%u/lif%u_spikes_timestep_%u.bin",
+            (layer->layer_num / 2) + 1, (layer->layer_num / 2) + 1, layer->curr_time_step);
+
+    spike_t *spikeData = loadBinarySpikeData(filename, layer->U.size);
+    if (!spikeData)
+    {
+        fprintf(stderr, "Failed to load spikes for timestep %u and LIF layer %u\n", layer->curr_time_step,
+                (layer->layer_num / 2) + 1);
+        exit(1);
+    }
+
+    for (unsigned int i = 0; i < layer->U.size; i++)
+    {
+        if (spikeData[i] != spikes->ptr[i])
+        {
+            fprintf(stderr,
+                    "Layer_%u (LIF): Spike value mismatch at position %u and time step %u.\nCorrect value = "
+                    "%u\tCalculated value = %u\n",
+                    layer->layer_num, i, layer->curr_time_step, spikeData[i], spikes->ptr[i]);
+            exit(1);
+        }
+    }
+    free(spikeData);
+
+    layer->curr_time_step++;
+    if (layer->curr_time_step >= TIME_STEPS)
+        layer->curr_time_step = 0;
+}
+#endif
+
 #endif
 
 void clearLIF(lif_t* layer){

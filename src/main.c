@@ -23,11 +23,15 @@ int main(void)
         return -1;
     }
 
+    #ifndef BINARY_IMPLEMENTATION
     /* Load weights and biases */
-    //loadStaticWeightsAndBiases();
+    loadStaticWeightsAndBiases();
+    #endif
 
+    #ifdef BINARY_IMPLEMENTATION
     /* Load BINARY weights and biases */
     loadBinaryStaticWeightsAndBiases();
+    #endif
 
     /* Reset the state */
     SNN.resetState_fptr(&SNN);
@@ -36,6 +40,7 @@ int main(void)
     char filename[256];
     for (unsigned int i = 0; i < TIME_STEPS; i++)
     {
+        #ifndef BINARY_IMPLEMENTATION
         // Construct the filename for the current timestep
         sprintf(filename, "../../models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs/input/inputs_timestep_%u.csv", i);
 
@@ -62,12 +67,27 @@ int main(void)
         SNN.run_fptr(&SNN, &In);
 
         freeCSVData(inputData, rows);
+        #endif
+
+        #ifdef BINARY_IMPLEMENTATION
+        // Construct the filename for the current timestep
+        sprintf(filename, "../../models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs_binary/inputs/inputs_timestep_%u.bin", i);
+
+        // Load the data for this time step
+        if (!loadBinaryInputData(filename, In.ptr, In.size))
+        {
+            fprintf(stderr, "Failed to load input data for timestep %u\n", i);
+            exit(1);
+        }
+        /* Run the model for one time step */
+        SNN.run_fptr(&SNN, &In);
+        #endif
+
+        
     }
 
     printf("Predicted class is: %d\n", SNN.predict_fptr(&SNN));
 
-    /* Free memory allocated for In */
-    //free(In.ptr);
 
     /* Free memory allocated for SNN */
     SNN.clearModel_fptr(&SNN);

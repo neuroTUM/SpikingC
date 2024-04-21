@@ -502,3 +502,84 @@ double simple_atof(const char *str)
 
     return value * sign;
 }
+
+int loadBinaryInputData(const char *filename, cfloat_t *buffer, size_t size)
+{
+    FILE *file = fopen(filename, "rb");
+    if (!file)
+    {
+        perror("Failed to open file");
+        return 0;
+    }
+
+    size_t items_read = fread(buffer, sizeof(cfloat_t), size, file);
+    if (items_read != size)
+    {
+        fprintf(stderr, "Error reading binary file: %s\n", filename);
+        fclose(file);
+        return 0;
+    }
+
+    fclose(file);
+    return 1;
+}
+
+float *loadBinaryFloatData(const char *filename, size_t size)
+{
+    FILE *file = fopen(filename, "rb");
+    if (!file)
+    {
+        perror("Failed to open file for reading");
+        return NULL;
+    }
+
+    float *data = malloc(size * sizeof(float));
+    if (!data)
+    {
+        fprintf(stderr, "Failed to allocate memory for reading data\n");
+        fclose(file);
+        return NULL;
+    }
+
+    size_t items_read = fread(data, sizeof(float), size, file);
+    if (items_read != size)
+    {
+        fprintf(stderr, "Failed to read the expected number of items from %s\n", filename);
+        free(data);
+        fclose(file);
+        return NULL;
+    }
+
+    fclose(file);
+    return data;
+}
+
+spike_t *loadBinarySpikeData(const char *filename, size_t size)
+{
+    FILE *file = fopen(filename, "rb");
+    if (!file)
+    {
+        perror("Failed to open file for reading");
+        return NULL;
+    }
+
+    spike_t *data = malloc(size * sizeof(spike_t));
+    if (!data)
+    {
+        fprintf(stderr, "Failed to allocate memory for reading data\n");
+        fclose(file);
+        return NULL;
+    }
+
+    size_t items_read = fread(data, sizeof(spike_t), size, file);
+    if (items_read != size)
+    {
+        fprintf(stderr, "Failed to read the expected number of items from %s\n", filename);
+        free(data);
+        fclose(file);
+        return NULL;
+    }
+
+    fclose(file);
+    return data;
+}
