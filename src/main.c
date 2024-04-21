@@ -24,7 +24,10 @@ int main(void)
     }
 
     /* Load weights and biases */
-    loadStaticWeightsAndBiases();
+    //loadStaticWeightsAndBiases();
+
+    /* Load BINARY weights and biases */
+    loadBinaryStaticWeightsAndBiases();
 
     /* Reset the state */
     SNN.resetState_fptr(&SNN);

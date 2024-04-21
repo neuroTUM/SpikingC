@@ -19,6 +19,7 @@ extern "C" {
 #define MEASURE_TIME
 //#define ONE_PASS_DEBUG
 #define DATALOADER
+//#define PRINT_WnB
 
 
 #ifdef DATALOADER
@@ -55,12 +56,19 @@ extern "C" {
 #define L3_SIZE_OUT 10
 #define LIF3_SIZE   10
 
-#define PATH_WEIGHTS_FC1    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc1_weights.csv"
-#define PATH_BIAS_FC1       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc1_bias.csv"
-#define PATH_WEIGHTS_FC2    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc2_weights.csv"
-#define PATH_BIAS_FC2       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc2_bias.csv"
-#define PATH_WEIGHTS_FC3    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc3_weights.csv"
-#define PATH_BIAS_FC3       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_biases/fc3_bias.csv"
+#define PATH_WEIGHTS_FC1        "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias/fc1_weights.csv"
+#define PATH_BIAS_FC1           "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias/fc1_bias.csv"
+#define PATH_WEIGHTS_FC2        "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias/fc2_weights.csv"
+#define PATH_BIAS_FC2           "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias/fc2_bias.csv"
+#define PATH_WEIGHTS_FC3        "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias/fc3_weights.csv"
+#define PATH_BIAS_FC3           "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias/fc3_bias.csv"
+
+#define PATH_WEIGHTS_FC1_BIN    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc1_weight.bin"
+#define PATH_BIAS_FC1_BIN       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc1_bias.bin"
+#define PATH_WEIGHTS_FC2_BIN    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc2_weight.bin"
+#define PATH_BIAS_FC2_BIN       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc2_bias.bin"
+#define PATH_WEIGHTS_FC3_BIN    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc3_weight.bin"
+#define PATH_BIAS_FC3_BIN       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc3_bias.bin"
 
 /* Floating point representation for network elements like membrane potentials, thresholds and beta values */
 typedef double cfloat_t;

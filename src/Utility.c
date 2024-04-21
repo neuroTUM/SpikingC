@@ -150,6 +150,136 @@ void loadStaticWeightsAndBiases()
     loadCSVToStaticBiasArray(PATH_BIAS_FC3, B, bIdx3, L3_SIZE_OUT);
 }
 
+void loadBinaryToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned int startIdx, unsigned int elements)
+{
+    FILE *file = fopen(filepath, "rb");
+    if (!file)
+    {
+        perror("Failed to open file for reading weights");
+        return;
+    }
+
+    // Allocate a temporary buffer to hold float values
+    float *tempBuffer = (float *)malloc(elements * sizeof(float));
+    if (tempBuffer == NULL)
+    {
+        fprintf(stderr, "Memory allocation failed for temporary buffer\n");
+        fclose(file);
+        return;
+    }
+
+    // Read the binary data into the temporary buffer
+    size_t readItems = fread(tempBuffer, sizeof(float), elements, file);
+    if (readItems != elements)
+    {
+        fprintf(stderr, "Failed to read the expected number of weight elements from %s\n", filepath);
+    }
+    else
+    {
+        // Convert from float to double and assign to the target array
+        for (unsigned int i = 0; i < elements; i++)
+        {
+            W[startIdx + i] = (wfloat_t)tempBuffer[i];
+        }
+    }
+
+    // Free the temporary buffer and close the file
+    free(tempBuffer);
+    fclose(file);
+}
+
+void loadBinaryToStaticBiasArray(const char *filepath, wfloat_t *B, unsigned int startIdx, unsigned int size)
+{
+    FILE *file = fopen(filepath, "rb");
+    if (!file)
+    {
+        perror("Failed to open file for reading biases");
+        return;
+    }
+
+    float *tempBuffer = (float *)malloc(size * sizeof(float));
+    if (tempBuffer == NULL)
+    {
+        fprintf(stderr, "Memory allocation failed for temporary buffer\n");
+        fclose(file);
+        return;
+    }
+
+    size_t readItems = fread(tempBuffer, sizeof(float), size, file);
+    if (readItems != size)
+    {
+        fprintf(stderr, "Failed to read the expected number of bias elements from %s\n", filepath);
+    }
+    else
+    {
+        for (unsigned int i = 0; i < size; i++)
+        {
+            B[startIdx + i] = (wfloat_t)tempBuffer[i];
+        }
+    }
+
+    free(tempBuffer);
+    fclose(file);
+}
+
+void loadBinaryStaticWeightsAndBiases()
+{
+    // Load FC1 weights and biases
+    loadBinaryToStaticWeightArray(PATH_WEIGHTS_FC1_BIN, W, 0, INPUT_SIZE * L1_SIZE_OUT);
+    loadBinaryToStaticBiasArray(PATH_BIAS_FC1_BIN, B, 0, L1_SIZE_OUT);
+
+    #ifdef PRINT_WnB
+    printWeightsMatrix(W, INPUT_SIZE, L1_SIZE_OUT);
+    printBiasVector(B, L1_SIZE_OUT);
+    #endif
+
+    // Load FC2 weights and biases
+    unsigned int wIdx2 = INPUT_SIZE * L1_SIZE_OUT;
+    unsigned int bIdx2 = L1_SIZE_OUT;
+    loadBinaryToStaticWeightArray(PATH_WEIGHTS_FC2_BIN, W, wIdx2, LIF1_SIZE * L2_SIZE_OUT);
+    loadBinaryToStaticBiasArray(PATH_BIAS_FC2_BIN, B, bIdx2, L2_SIZE_OUT);
+
+    #ifdef PRINT_WnB
+    printWeightsMatrix(W + wIdx2, LIF1_SIZE, L2_SIZE_OUT);
+    printBiasVector(B + bIdx2, L2_SIZE_OUT);
+    #endif
+
+    // Load FC3 weights and biases
+    unsigned int wIdx3 = wIdx2 + LIF1_SIZE * L2_SIZE_OUT;
+    unsigned int bIdx3 = bIdx2 + L2_SIZE_OUT;
+    loadBinaryToStaticWeightArray(PATH_WEIGHTS_FC3_BIN, W, wIdx3, LIF2_SIZE * L3_SIZE_OUT);
+    loadBinaryToStaticBiasArray(PATH_BIAS_FC3_BIN, B, bIdx3, L3_SIZE_OUT);
+
+    #ifdef PRINT_WnB
+    printWeightsMatrix(W + wIdx3, LIF2_SIZE, L3_SIZE_OUT);
+    printBiasVector(B + bIdx3, L3_SIZE_OUT);
+    #endif
+}
+
+void printWeightsMatrix(wfloat_t *W, unsigned int rows, unsigned int cols)
+{
+    printf("Weights Matrix [%u x %u]:\n", rows, cols);
+    for (unsigned int i = 0; i < rows; i++)
+    {
+        for (unsigned int j = 0; j < cols; j++)
+        {
+            printf("%.4f ", W[i * cols + j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+void printBiasVector(wfloat_t *B, unsigned int size)
+{
+    printf("Bias Vector [%u]:\n", size);
+    for (unsigned int i = 0; i < size; i++)
+    {
+        printf("%.4f ", B[i]);
+    }
+    printf("\n\n");
+}
+
 // Function to read CSV file into a 2D array
 float **readCSV(const char *filename, int *rows, int *cols)
 {

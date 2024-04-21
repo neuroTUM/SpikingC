@@ -93,6 +93,16 @@ void loadCSVToStaticBiasArray(const char *filepath, wfloat_t *B, unsigned int st
 
 void loadStaticWeightsAndBiases();
 
+void loadBinaryToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned int startIdx, unsigned int elements);
+
+void loadBinaryToStaticBiasArray(const char *filepath, wfloat_t *B, unsigned int startIdx, unsigned int size);
+
+void loadBinaryStaticWeightsAndBiases();
+
+void printWeightsMatrix(wfloat_t *W, unsigned int rows, unsigned int cols);
+
+void printBiasVector(wfloat_t *B, unsigned int size);
+
 float **readCSV(const char *filename, int *rows, int *cols);
 
 int compareOutputs(float *computed, float *expected, int size);
