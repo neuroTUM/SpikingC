@@ -194,8 +194,28 @@ void loadBinaryStaticWeightsAndBiases();
  */
 int loadBinaryInputData(const char *filename, cfloat_t *buffer, size_t size);
 
+/**
+ * Loads an array of floating-point data from a binary file. This function is designed to be used
+ * for reading continuous blocks of float data, such as neural network weights or any floating-point parameters.
+ *
+ * @param filename The path to the binary file from which to read the float data.
+ * @param size The number of float elements to be read from the file.
+ * @return Pointer to the array of floats read from the file, or NULL if an error occurs.
+ *         The caller is responsible for freeing this memory.
+ * @note This function allocates memory for the returned array and the caller must free it.
+ */
 float *loadBinaryFloatData(const char *filename, size_t size);
 
+/**
+ * Loads an array of spike data from a binary file. This function is particularly useful
+ * for neural network models where spike information is stored in a compact binary format.
+ *
+ * @param filename The path to the binary file from which to read the spike data.
+ * @param size The number of spike_t elements to be read from the file.
+ * @return Pointer to the array of spike_t data read from the file, or NULL if an error occurs.
+ *         The caller is responsible for freeing this memory.
+ * @note This function allocates memory for the returned array and the caller must free it.
+ */
 spike_t *loadBinarySpikeData(const char *filename, size_t size);
 
 #endif
