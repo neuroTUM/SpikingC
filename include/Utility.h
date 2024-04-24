@@ -87,6 +87,8 @@ void matrixVectorMul(wfloat_2d_array_t* W, wfloat_array_t* B, cfloat_array_t* In
  */
 void matrixVectorMulSparse(wfloat_2d_array_t* W, wfloat_array_t* B, spike_array_t* In, cfloat_array_t* Out);
 
+#ifndef BINARY_IMPLEMENTATION
+
 /**
  * Loads weight values from a CSV file into a static array for neural network weights.
  * This function parses the CSV file and converts string representations of floating point numbers into actual floating
@@ -119,6 +121,39 @@ void loadCSVToStaticBiasArray(const char *filepath, wfloat_t *B, unsigned int st
 void loadStaticWeightsAndBiases();
 
 /**
+ * Reads a CSV file and stores its contents into a dynamically allocated 2D array of floats.
+ * This function opens a CSV file, reads it line by line, and splits each line into tokens based on comma delimiters,
+ * converting each token into a float and storing it in an array.
+ *
+ * @param filename Path to the CSV file.
+ * @param rows Pointer to an integer where the number of rows will be stored.
+ * @param cols Pointer to an integer where the number of columns will be stored.
+ * @return A pointer to a 2D array of floats containing the parsed data.
+ */
+float **readCSV(const char *filename, int *rows, int *cols);
+
+/**
+ * Frees the memory allocated for a 2D array of floats.
+ * This function is used to clean up memory after it is no longer needed, typically after processing CSV data.
+ *
+ * @param data Pointer to the 2D array of floats.
+ * @param rows Number of rows in the array (i.e., how many pointers in the first dimension to free).
+ */
+void freeCSVData(float **data, int rows);
+
+/**
+ * Converts a string to a floating point number (double precision).
+ * This function is a simple alternative to standard library functions like atof, providing error handling and improved
+ * robustness.
+ *
+ * @param str Pointer to the string containing the number to convert.
+ * @return The converted double value.
+ */
+double simple_atof(const char *str);
+
+#else
+
+/**
  * Loads weight values from a binary file into a static array.
  * Directly reads binary floating point data into the weight array, which is more efficient than parsing text.
  * Assumes that the binary file contains data in the format of 'float' which is then converted to 'double' if necessary.
@@ -149,6 +184,25 @@ void loadBinaryToStaticBiasArray(const char *filepath, wfloat_t *B, unsigned int
 void loadBinaryStaticWeightsAndBiases();
 
 /**
+ * Loads input data from a binary file directly into the provided memory buffer.
+ * Assumes the binary file contains float data (as used by your model).
+ *
+ * @param filename The path to the binary input file.
+ * @param buffer The memory buffer to load data into.
+ * @param size The number of float elements expected in the buffer.
+ * @return 1 on success, 0 on failure.
+ */
+int loadBinaryInputData(const char *filename, cfloat_t *buffer, size_t size);
+
+float *loadBinaryFloatData(const char *filename, size_t size);
+
+spike_t *loadBinarySpikeData(const char *filename, size_t size);
+
+#endif
+
+#ifdef PRINT_WnB
+
+/**
  * Prints a matrix of weights to the console for debugging or analysis purposes.
  * This function iterates over rows and columns of the weight matrix, printing each element in a formatted manner.
  *
@@ -167,37 +221,9 @@ void printWeightsMatrix(wfloat_t *W, unsigned int rows, unsigned int cols);
  */
 void printBiasVector(wfloat_t *B, unsigned int size);
 
-/**
- * Reads a CSV file and stores its contents into a dynamically allocated 2D array of floats.
- * This function opens a CSV file, reads it line by line, and splits each line into tokens based on comma delimiters,
- * converting each token into a float and storing it in an array.
- *
- * @param filename Path to the CSV file.
- * @param rows Pointer to an integer where the number of rows will be stored.
- * @param cols Pointer to an integer where the number of columns will be stored.
- * @return A pointer to a 2D array of floats containing the parsed data.
- */
-float **readCSV(const char *filename, int *rows, int *cols);
+#endif
 
-/**
- * Compares two arrays of floats to check if their elements are the same up to a defined precision.
- * This is typically used to verify that the outputs of computations in numerical algorithms are as expected.
- *
- * @param computed Array of computed values.
- * @param expected Array of expected values.
- * @param size Number of elements in each array to compare.
- * @return The index of the first mismatch if a difference is found; -1 if all values match.
- */
-int compareOutputs(float *computed, float *expected, int size);
-
-/**
- * Frees the memory allocated for a 2D array of floats.
- * This function is used to clean up memory after it is no longer needed, typically after processing CSV data.
- *
- * @param data Pointer to the 2D array of floats.
- * @param rows Number of rows in the array (i.e., how many pointers in the first dimension to free).
- */
-void freeCSVData(float **data, int rows);
+#ifdef DATALOADER
 
 /**
  * Extracts a label from a filename string based on a naming convention where the label is embedded between underscores
@@ -229,38 +255,7 @@ void loadInputsFromFile(const char *filePath, cfloat_t *scratchpadMemory, size_t
  */
 void loadTimestepFromFile(FILE *file, cfloat_t *scratchpadMemory, size_t timestepIndex);
 
-/**
- * Clears and deallocates the scratchpad memory used for temporary storage during computations.
- * This function is used to free memory to prevent memory leaks and to ensure that no stale data remains.
- *
- * @param scratchpadMemory Pointer to the scratchpad memory to be cleared.
- */
-void clearScratchpadMemory(cfloat_t *scratchpadMemory);
-
-/**
- * Converts a string to a floating point number (double precision).
- * This function is a simple alternative to standard library functions like atof, providing error handling and improved
- * robustness.
- *
- * @param str Pointer to the string containing the number to convert.
- * @return The converted double value.
- */
-double simple_atof(const char *str);
-
-/**
- * Loads input data from a binary file directly into the provided memory buffer.
- * Assumes the binary file contains float data (as used by your model).
- *
- * @param filename The path to the binary input file.
- * @param buffer The memory buffer to load data into.
- * @param size The number of float elements expected in the buffer.
- * @return 1 on success, 0 on failure.
- */
-int loadBinaryInputData(const char *filename, cfloat_t *buffer, size_t size);
-
-float *loadBinaryFloatData(const char *filename, size_t size);
-
-spike_t *loadBinarySpikeData(const char *filename, size_t size);
+#endif
 
 #ifdef __cplusplus
 }

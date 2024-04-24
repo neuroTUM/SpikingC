@@ -88,6 +88,8 @@ void matrixVectorMulSparse(wfloat_2d_array_t* W, wfloat_array_t* B, spike_array_
     }
 }
 
+#ifndef BINARY_IMPLEMENTATION
+
 void loadCSVToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned int startIdx, unsigned int elements)
 {
     FILE *file = fopen(filepath, "r");
@@ -149,6 +151,127 @@ void loadStaticWeightsAndBiases()
     loadCSVToStaticWeightArray(PATH_WEIGHTS_FC3, W, wIdx3, LIF2_SIZE * L3_SIZE_OUT);
     loadCSVToStaticBiasArray(PATH_BIAS_FC3, B, bIdx3, L3_SIZE_OUT);
 }
+
+// Function to read CSV file into a 2D array
+float **readCSV(const char *filename, int *rows, int *cols)
+{
+    FILE *file = fopen(filename, "r");
+    if (!file)
+    {
+        perror("Failed to open file");
+        return NULL;
+    }
+
+    char line[MAX_LINE_LENGTH];
+    if (!fgets(line, MAX_LINE_LENGTH, file))
+    {
+        // Handle error or empty file
+        fclose(file);
+        return NULL;
+    }
+
+    // Temporarily count columns
+    int colCount = 1; // Starting at one since counting separators
+    for (char *temp = line; *temp; temp++)
+    {
+        if (*temp == ',')
+            colCount++;
+    }
+
+    *cols = colCount; // Assuming cols is correctly passed in
+
+    float **data = NULL;
+    *rows = 0;
+
+    rewind(file); // Go back to start to read data again
+
+    while (fgets(line, MAX_LINE_LENGTH, file))
+    {
+        data = (float **)realloc(data, (*rows + 1) * sizeof(float *));
+        if (!data)
+        {
+            // Handle realloc failure
+            *rows = 0;
+            fclose(file);
+            return NULL;
+        }
+
+        data[*rows] = (float*)malloc(colCount * sizeof(float));
+        if (!data[*rows])
+        {
+            // Handle malloc failure, cleanup previously allocated rows
+            for (int i = 0; i < *rows; i++)
+                free(data[i]);
+            free(data);
+            *rows = 0;
+            fclose(file);
+            return NULL;
+        }
+
+        // Split line into tokens and convert to float
+        char *token = strtok(line, ",");
+        int col = 0;
+        while (token != NULL && col < colCount)
+        {
+            data[*rows][col++] = simple_atof(token);
+            token = strtok(NULL, ",");
+        }
+        (*rows)++;
+    }
+
+    fclose(file);
+    return data;
+}
+
+void freeCSVData(float **data, int rows)
+{
+    for (int i = 0; i < rows; i++)
+    {
+        free(data[i]);
+    }
+    free(data);
+}
+
+double simple_atof(const char *str)
+{
+    double value = 0;
+    int sign = 1;
+
+    // Skip whitespace
+    while (isspace(*str))
+        str++;
+
+    // Check for sign
+    if (*str == '+' || *str == '-')
+    {
+        sign = (*str == '-') ? -1 : 1;
+        str++;
+    }
+
+    // Convert integer part
+    while (isdigit(*str))
+    {
+        value = value * 10.0 + (*str - '0');
+        str++;
+    }
+
+    // Convert fractional part
+    if (*str == '.')
+    {
+        double fraction = 0.1;
+        str++;
+        while (isdigit(*str))
+        {
+            value += (*str - '0') * fraction;
+            fraction *= 0.1;
+            str++;
+        }
+    }
+
+    return value * sign;
+}
+
+#else
 
 void loadBinaryToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned int startIdx, unsigned int elements)
 {
@@ -256,6 +379,91 @@ void loadBinaryStaticWeightsAndBiases()
     #endif
 }
 
+int loadBinaryInputData(const char *filename, cfloat_t *buffer, size_t size)
+{
+    FILE *file = fopen(filename, "rb");
+    if (!file)
+    {
+        perror("Failed to open file");
+        return 0;
+    }
+
+    size_t items_read = fread(buffer, sizeof(cfloat_t), size, file);
+    if (items_read != size)
+    {
+        fprintf(stderr, "Error reading binary file: %s\n", filename);
+        fclose(file);
+        return 0;
+    }
+
+    fclose(file);
+    return 1;
+}
+
+float *loadBinaryFloatData(const char *filename, size_t size)
+{
+    FILE *file = fopen(filename, "rb");
+    if (!file)
+    {
+        perror("Failed to open file for reading");
+        return NULL;
+    }
+
+    float *data = malloc(size * sizeof(float));
+    if (!data)
+    {
+        fprintf(stderr, "Failed to allocate memory for reading data\n");
+        fclose(file);
+        return NULL;
+    }
+
+    size_t items_read = fread(data, sizeof(float), size, file);
+    if (items_read != size)
+    {
+        fprintf(stderr, "Failed to read the expected number of items from %s\n", filename);
+        free(data);
+        fclose(file);
+        return NULL;
+    }
+
+    fclose(file);
+    return data;
+}
+
+spike_t *loadBinarySpikeData(const char *filename, size_t size)
+{
+    FILE *file = fopen(filename, "rb");
+    if (!file)
+    {
+        perror("Failed to open file for reading");
+        return NULL;
+    }
+
+    spike_t *data = malloc(size * sizeof(spike_t));
+    if (!data)
+    {
+        fprintf(stderr, "Failed to allocate memory for reading data\n");
+        fclose(file);
+        return NULL;
+    }
+
+    size_t items_read = fread(data, sizeof(spike_t), size, file);
+    if (items_read != size)
+    {
+        fprintf(stderr, "Failed to read the expected number of items from %s\n", filename);
+        free(data);
+        fclose(file);
+        return NULL;
+    }
+
+    fclose(file);
+    return data;
+}
+
+#endif
+
+#ifdef PRINT_WnB
+
 void printWeightsMatrix(wfloat_t *W, unsigned int rows, unsigned int cols)
 {
     printf("Weights Matrix [%u x %u]:\n", rows, cols);
@@ -280,98 +488,9 @@ void printBiasVector(wfloat_t *B, unsigned int size)
     printf("\n\n");
 }
 
-// Function to read CSV file into a 2D array
-float **readCSV(const char *filename, int *rows, int *cols)
-{
-    FILE *file = fopen(filename, "r");
-    if (!file)
-    {
-        perror("Failed to open file");
-        return NULL;
-    }
+#endif
 
-    char line[MAX_LINE_LENGTH];
-    if (!fgets(line, MAX_LINE_LENGTH, file))
-    {
-        // Handle error or empty file
-        fclose(file);
-        return NULL;
-    }
-
-    // Temporarily count columns
-    int colCount = 1; // Starting at one since counting separators
-    for (char *temp = line; *temp; temp++)
-    {
-        if (*temp == ',')
-            colCount++;
-    }
-
-    *cols = colCount; // Assuming cols is correctly passed in
-
-    float **data = NULL;
-    *rows = 0;
-
-    rewind(file); // Go back to start to read data again
-
-    while (fgets(line, MAX_LINE_LENGTH, file))
-    {
-        data = (float **)realloc(data, (*rows + 1) * sizeof(float *));
-        if (!data)
-        {
-            // Handle realloc failure
-            *rows = 0;
-            fclose(file);
-            return NULL;
-        }
-
-        data[*rows] = (float*)malloc(colCount * sizeof(float));
-        if (!data[*rows])
-        {
-            // Handle malloc failure, cleanup previously allocated rows
-            for (int i = 0; i < *rows; i++)
-                free(data[i]);
-            free(data);
-            *rows = 0;
-            fclose(file);
-            return NULL;
-        }
-
-        // Split line into tokens and convert to float
-        char *token = strtok(line, ",");
-        int col = 0;
-        while (token != NULL && col < colCount)
-        {
-            data[*rows][col++] = simple_atof(token);
-            token = strtok(NULL, ",");
-        }
-        (*rows)++;
-    }
-
-    fclose(file);
-    return data;
-}
-
-// Function to compare two arrays of floats
-int compareOutputs(float *computed, float *expected, int size)
-{
-    for (int i = 0; i < size; i++)
-    {
-        if (fabs(computed[i] - expected[i]) > EPSILON)
-        {
-            return i; // Return the index of first mismatch
-        }
-    }
-    return -1; // No mismatch found
-}
-
-void freeCSVData(float **data, int rows)
-{
-    for (int i = 0; i < rows; i++)
-    {
-        free(data[i]);
-    }
-    free(data);
-}
+#ifdef DATALOADER
 
 int extractLabelFromFilename(const char *filename)
 {
@@ -457,129 +576,4 @@ void loadTimestepFromFile(FILE *file, cfloat_t *scratchpadMemory, size_t timeste
     }
 }
 
-void clearScratchpadMemory(cfloat_t *scratchpadMemory)
-{
-    // If the scratchpadMemory was dynamically allocated:
-    free(scratchpadMemory);
-    scratchpadMemory = NULL; // Set pointer to NULL after freeing
-}
-
-double simple_atof(const char *str)
-{
-    double value = 0;
-    int sign = 1;
-
-    // Skip whitespace
-    while (isspace(*str))
-        str++;
-
-    // Check for sign
-    if (*str == '+' || *str == '-')
-    {
-        sign = (*str == '-') ? -1 : 1;
-        str++;
-    }
-
-    // Convert integer part
-    while (isdigit(*str))
-    {
-        value = value * 10.0 + (*str - '0');
-        str++;
-    }
-
-    // Convert fractional part
-    if (*str == '.')
-    {
-        double fraction = 0.1;
-        str++;
-        while (isdigit(*str))
-        {
-            value += (*str - '0') * fraction;
-            fraction *= 0.1;
-            str++;
-        }
-    }
-
-    return value * sign;
-}
-
-int loadBinaryInputData(const char *filename, cfloat_t *buffer, size_t size)
-{
-    FILE *file = fopen(filename, "rb");
-    if (!file)
-    {
-        perror("Failed to open file");
-        return 0;
-    }
-
-    size_t items_read = fread(buffer, sizeof(cfloat_t), size, file);
-    if (items_read != size)
-    {
-        fprintf(stderr, "Error reading binary file: %s\n", filename);
-        fclose(file);
-        return 0;
-    }
-
-    fclose(file);
-    return 1;
-}
-
-float *loadBinaryFloatData(const char *filename, size_t size)
-{
-    FILE *file = fopen(filename, "rb");
-    if (!file)
-    {
-        perror("Failed to open file for reading");
-        return NULL;
-    }
-
-    float *data = malloc(size * sizeof(float));
-    if (!data)
-    {
-        fprintf(stderr, "Failed to allocate memory for reading data\n");
-        fclose(file);
-        return NULL;
-    }
-
-    size_t items_read = fread(data, sizeof(float), size, file);
-    if (items_read != size)
-    {
-        fprintf(stderr, "Failed to read the expected number of items from %s\n", filename);
-        free(data);
-        fclose(file);
-        return NULL;
-    }
-
-    fclose(file);
-    return data;
-}
-
-spike_t *loadBinarySpikeData(const char *filename, size_t size)
-{
-    FILE *file = fopen(filename, "rb");
-    if (!file)
-    {
-        perror("Failed to open file for reading");
-        return NULL;
-    }
-
-    spike_t *data = malloc(size * sizeof(spike_t));
-    if (!data)
-    {
-        fprintf(stderr, "Failed to allocate memory for reading data\n");
-        fclose(file);
-        return NULL;
-    }
-
-    size_t items_read = fread(data, sizeof(spike_t), size, file);
-    if (items_read != size)
-    {
-        fprintf(stderr, "Failed to read the expected number of items from %s\n", filename);
-        free(data);
-        fclose(file);
-        return NULL;
-    }
-
-    fclose(file);
-    return data;
-}
+#endif

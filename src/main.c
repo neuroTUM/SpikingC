@@ -1,16 +1,10 @@
 #include "../include/Model.h"
 #include "../include/Utility.h"
 
-#define PATH_BIN_DATA "/home/copparihollmann/neuroTUM/NMNIST/"
+#define PATH_BIN_DATA "/home/aleksa_tum/main/neuroTUM/Cpp_SNN_framework/SpikingCpp/tests/NMNIST_testset_bin/"
 
 int main(void)
-{   
-
-    #ifdef MEASURE_TIME
-    clock_t t; 
-    t = clock();
-    #endif
-
+{
     model_t SNN;
     initModel(&SNN);
 
@@ -26,9 +20,7 @@ int main(void)
     #ifndef BINARY_IMPLEMENTATION
     /* Load weights and biases */
     loadStaticWeightsAndBiases();
-    #endif
-
-    #ifdef BINARY_IMPLEMENTATION
+    #else
     /* Load BINARY weights and biases */
     loadBinaryStaticWeightsAndBiases();
     #endif
@@ -36,7 +28,7 @@ int main(void)
     /* Reset the state */
     SNN.resetState_fptr(&SNN);
     
-    #ifdef ONE_PASS_DEBUG
+    #ifdef TEST
     char filename[256];
     for (unsigned int i = 0; i < TIME_STEPS; i++)
     {
@@ -67,9 +59,7 @@ int main(void)
         SNN.run_fptr(&SNN, &In);
 
         freeCSVData(inputData, rows);
-        #endif
-
-        #ifdef BINARY_IMPLEMENTATION
+        #else
         // Construct the filename for the current timestep
         sprintf(filename, "../../models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs_binary/inputs/inputs_timestep_%u.bin", i);
 
@@ -166,11 +156,6 @@ int main(void)
     {
         printf("No .bin files processed.\n");
     }
-    #endif
-
-    #ifdef MEASURE_TIME
-    double time_taken = ((double)t) / CLOCKS_PER_SEC;
-    printf("Execution time in seconds: %f\n", time_taken);
     #endif
 
     return 0;

@@ -60,9 +60,7 @@ void testLIF(lif_t* layer, const spike_array_t* spikes){
     if(layer->curr_time_step >= TIME_STEPS)
         layer->curr_time_step = 0;    
 }
-#endif
-
-#ifdef BINARY_IMPLEMENTATION
+#else
 void testLIF(lif_t *layer, const spike_array_t *spikes)
 {
 
