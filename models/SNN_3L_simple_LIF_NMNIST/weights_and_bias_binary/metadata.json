@@ -1,0 +1,41 @@
+{
+    "fc1.weight": {
+        "shape": [
+            578,
+            2312
+        ],
+        "dtype": "torch.float32"
+    },
+    "fc1.bias": {
+        "shape": [
+            578
+        ],
+        "dtype": "torch.float32"
+    },
+    "fc2.weight": {
+        "shape": [
+            289,
+            578
+        ],
+        "dtype": "torch.float32"
+    },
+    "fc2.bias": {
+        "shape": [
+            289
+        ],
+        "dtype": "torch.float32"
+    },
+    "fc3.weight": {
+        "shape": [
+            10,
+            289
+        ],
+        "dtype": "torch.float32"
+    },
+    "fc3.bias": {
+        "shape": [
+            10
+        ],
+        "dtype": "torch.float32"
+    }
+}
