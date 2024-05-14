@@ -82,9 +82,9 @@ extern char         layer_type[NUM_LAYERS][MAX_STR_LEN];
 extern cfloat_t     Beta[NUM_LAYERS];
 extern cfloat_t     threshold[NUM_LAYERS];
 
-/* Statically allocated memory for weights in row major order */
+/* Statically allocated memory for weights in column major order */
 extern wfloat_t W[INPUT_SIZE * L1_SIZE_OUT + 
-                  LIF1_SIZE * L2_SIZE_OUT    +
+                  LIF1_SIZE * L2_SIZE_OUT  +
                   LIF2_SIZE * L3_SIZE_OUT];
 
 /* Statically allocated memory for biases */
@@ -100,6 +100,14 @@ extern spike_t spike_memory[((LIF1_SIZE + LIF2_SIZE + LIF3_SIZE) / 8) + (NUM_LAY
 
 /* Statically allocated memory for membrane potentials */
 extern cfloat_t mem_potential[LIF1_SIZE + LIF2_SIZE + LIF3_SIZE];
+
+/* Linked list used to store events */
+typedef struct event{
+    unsigned int position;
+    struct event* next;
+} event_t;
+
+extern event_t* event_list[NUM_LAYERS / 2];
 
 /* Structures for easier data handling */
 typedef struct{

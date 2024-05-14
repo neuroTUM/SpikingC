@@ -1,7 +1,7 @@
 #include "../include/Model.h"
 #include "../include/Utility.h"
 
-#define PATH_BIN_DATA "/home/copparihollmann/neuroTUM/NMNIST/"
+#define PATH_BIN_DATA "/home/aleksa_tum/main/neuroTUM/Cpp_SNN_framework/SpikingCpp/tests/NMNIST_testset_bin"
 
 int main(void)
 {

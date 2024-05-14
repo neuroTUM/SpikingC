@@ -85,7 +85,22 @@ void matrixVectorMul(wfloat_2d_array_t* W, wfloat_array_t* B, cfloat_array_t* In
  * @param Out A structure containing the pointer to the first element of the array where outputs will be written.
  * @return Nothing is returned.
  */
-void matrixVectorMulSparse(wfloat_2d_array_t* W, wfloat_array_t* B, spike_array_t* In, cfloat_array_t* Out);
+void matrixVectorMulSparse(wfloat_2d_array_t* W, wfloat_array_t* B, cfloat_array_t* Out);
+
+/**
+ * Pushes an element to the front of a linked list.
+ * 
+ * @param el The value that has to be pushed
+ * @return True if memory allocation was successful. Otherwise false.
+*/
+bool pushToList(unsigned int el);
+
+/**
+ * Empties a linked list completely.
+ * 
+ * @return Nothing is returned.
+*/
+void emptyList();
 
 #ifndef BINARY_IMPLEMENTATION
 

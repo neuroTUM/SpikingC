@@ -62,30 +62,53 @@ void matrixVectorMul(wfloat_2d_array_t* W, wfloat_array_t* B, cfloat_array_t* In
     }
 }
 
-void matrixVectorMulSparse(wfloat_2d_array_t* W, wfloat_array_t* B, spike_array_t* In, cfloat_array_t* Out){
+void matrixVectorMulSparse(wfloat_2d_array_t* W, wfloat_array_t* B, cfloat_array_t* Out){
 
-    if((W->cols != In->size) || (W->rows != B->size) || (Out->size != B->size)){
-        printf("matrixVectorMulSparse : Inappropriate dimensions\n"); 
-        exit(1);        
+    event_t* temp = event_list;
+
+    /* Initialize all elements in Out with values from B */
+    for(unsigned int i = 0; i < B->size; i++){
+        Out->ptr[i] = B->ptr[i];
     }
 
-    cfloat_t r;
-    spike_t val;
-    for(unsigned int i = 0; i < W->rows; i++){
-        r = 0;
-        for(unsigned int j = 0; j < W->cols; j += sizeof(spike_t) * 8){
-            val = In->ptr[j / (sizeof(spike_t) * 8)];
-            if(val == 0)
-                continue;
-            else{
-                for(unsigned int k = j; k < j + sizeof(spike_t) * 8 && j < W->cols; k++){
-                    if(BITVALUE(val, k - j))
-                        r += W->ptr[i][k];
-                }
-            } 
+    /* Traverse through all non-zero elements */
+    while(temp != NULL)
+    {
+        /* Add the whole columns element-wise to the output vector */
+        for(unsigned int i = 0; i < W->rows; i++){
+            Out->ptr[i] += W->ptr[i][temp->position];
         }
-        Out->ptr[i] = r + B->ptr[i];
+        temp = temp->next;
     }
+}
+
+bool pushToList(unsigned int el){
+    if(event_list == NULL){
+        event_list->position = el;
+        event_list->next = NULL;
+        return true;
+    }
+    else{
+        event_t* event = (event_t*)malloc(sizeof(event_t));
+        if(event == NULL)
+            return false;
+        event->next = event_list;
+        event->position = el;
+        event_list = event;
+        return true;
+    }
+}
+
+void emptyList(){
+    event_t *current = event_list;
+    event_t *next;
+    while (current != NULL)
+    {
+       next = current->next;
+       free(current);
+       current = next;
+    }
+    event_list = NULL;
 }
 
 #ifndef BINARY_IMPLEMENTATION

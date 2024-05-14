@@ -15,3 +15,4 @@ wfloat_t        B[L1_SIZE_OUT  +
 cfloat_t        scrachpad_memory[INPUT_SIZE + L1_SIZE_OUT];
 spike_t         spike_memory[((LIF1_SIZE + LIF2_SIZE + LIF3_SIZE) / 8) + (NUM_LAYERS / 2)];
 cfloat_t        mem_potential[LIF1_SIZE + LIF2_SIZE + LIF3_SIZE];
+event_t*        event_list[NUM_LAYERS / 2] = {NULL, NULL, NULL};
