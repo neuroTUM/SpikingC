@@ -30,7 +30,7 @@ typedef union{
 typedef struct Model{
     /* A pointer to an array of layers */
     layer_instance_t* layers;
-    cfloat_array_t floatOut;
+    fxp16_array_t fxpOut;
     unsigned int *actPred;
     void (*clearModel_fptr) (struct Model*);
     void (*resetState_fptr) (struct Model*);

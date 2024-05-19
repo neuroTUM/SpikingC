@@ -14,18 +14,16 @@ unsigned int getOffset(unsigned int layer_num, char offset_type, const char* str
         }
         else if(strcmp(layer_type[i], "LIF") == 0 && strcmp(str, "LIF") == 0){
             if(offset_type == 'V')
-                offset += layer_size[i + 1];
-            else if(offset_type == 'S')
-                offset += (layer_size[i + 1] / (sizeof(spike_t) * 8)) + 1;            
+                offset += layer_size[i + 1];          
         }
     }
 
     return offset;
 }
 
-wfloat_t** returnWeightPtr(unsigned int layer_num){
-    wfloat_t** ptr;
-    ptr = (wfloat_t **)malloc(sizeof(wfloat_t*) * layer_size[layer_num]);
+fxp8_t** returnWeightPtr(unsigned int layer_num){
+    fxp8_t** ptr;
+    ptr = (fxp8_t **)malloc(sizeof(fxp8_t*) * layer_size[layer_num]);
 
     for(unsigned int i = 0; i < layer_size[layer_num]; i++){
         ptr[i] = &W[i * layer_size[layer_num + 1] + getOffset(layer_num, 'M', "Linear")];
@@ -33,15 +31,15 @@ wfloat_t** returnWeightPtr(unsigned int layer_num){
     return ptr;
 }
 
-wfloat_t* returnBiasPtr(unsigned int layer_num){
+fxp8_t* returnBiasPtr(unsigned int layer_num){
     return &B[getOffset(layer_num, 'V', "Linear")];
 }
 
-cfloat_t* returnMemPotentialPtr(unsigned int layer_num){
+fxp16_t* returnMemPotentialPtr(unsigned int layer_num){
     return &mem_potential[getOffset(layer_num, 'V', "LIF")];
 }
 
-void matrixVectorMulSparse(wfloat_2d_array_t* W, wfloat_array_t* B, cfloat_array_t* Out){
+void matrixVectorMulSparse(fxp8_2d_array_t* W, fxp8_array_t* B, fxp16_array_t* Out){
 
     event_t* temp = event_list;
 
@@ -55,7 +53,22 @@ void matrixVectorMulSparse(wfloat_2d_array_t* W, wfloat_array_t* B, cfloat_array
     {
         /* Add the whole columns element-wise to the output vector */
         for(unsigned int i = 0; i < W->rows; i++){
-            Out->ptr[i] += W->ptr[temp->position][i];
+
+            /* IMPORTANT: All checks for over/underflow are a part of the custom instruction and shouldn't be
+                        visible in the C code. Here I only want to simulate the effect those instructions will 
+                        have once they are implemented.
+            */            
+
+            /* Saturate the output value if it goes outside of the predefined range */
+            if((int)Out->ptr[i] + (int)W->ptr[temp->position][i] < INT16_MIN){
+                Out->ptr[i] = INT16_MIN;
+            }
+            else if((int)Out->ptr[i] + (int)W->ptr[temp->position][i] > INT16_MAX){
+                Out->ptr[i] = INT16_MAX;
+            }
+            else{
+                Out->ptr[i] += W->ptr[temp->position][i];
+            }
         }
         temp = temp->next;
     }
@@ -95,7 +108,7 @@ void emptyList(){
 
 #ifndef BINARY_IMPLEMENTATION
 
-void loadCSVToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned int startIdx, unsigned int elements)
+void loadCSVToStaticWeightArray(const char *filepath, fxp8_t *W, unsigned int startIdx, unsigned int elements)
 {
     FILE *file = fopen(filepath, "r");
     if (!file)
@@ -118,7 +131,7 @@ void loadCSVToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned int 
     fclose(file);
 }
 
-void loadCSVToStaticBiasArray(const char *filepath, wfloat_t *B, unsigned int startIdx, unsigned int size)
+void loadCSVToStaticBiasArray(const char *filepath, fxp8_t *B, unsigned int startIdx, unsigned int size)
 {
     FILE *file = fopen(filepath, "r");
     if (!file)
@@ -278,7 +291,7 @@ double simple_atof(const char *str)
 
 #else
 
-void loadBinaryToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned int startIdx, unsigned int elements)
+void loadBinaryToStaticWeightArray(const char *filepath, fxp8_t *W, unsigned int startIdx, unsigned int elements)
 {
     FILE *file = fopen(filepath, "rb");
     if (!file)
@@ -307,7 +320,7 @@ void loadBinaryToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned i
         // Convert from float to double and assign to the target array
         for (unsigned int i = 0; i < elements; i++)
         {
-            W[startIdx + i] = (wfloat_t)tempBuffer[i];
+            W[startIdx + i] = (fxp8_t)tempBuffer[i];
         }
     }
 
@@ -316,7 +329,7 @@ void loadBinaryToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned i
     fclose(file);
 }
 
-void loadBinaryToStaticBiasArray(const char *filepath, wfloat_t *B, unsigned int startIdx, unsigned int size)
+void loadBinaryToStaticBiasArray(const char *filepath, fxp8_t *B, unsigned int startIdx, unsigned int size)
 {
     FILE *file = fopen(filepath, "rb");
     if (!file)
@@ -342,7 +355,7 @@ void loadBinaryToStaticBiasArray(const char *filepath, wfloat_t *B, unsigned int
     {
         for (unsigned int i = 0; i < size; i++)
         {
-            B[startIdx + i] = (wfloat_t)tempBuffer[i];
+            B[startIdx + i] = (fxp8_t)tempBuffer[i];
         }
     }
 
@@ -384,7 +397,7 @@ void loadBinaryStaticWeightsAndBiases()
     #endif
 }
 
-int loadBinaryInputData(const char *filename, cfloat_t *buffer, size_t size)
+int loadBinaryInputData(const char *filename, fxp16_t *buffer, size_t size)
 {
     FILE *file = fopen(filename, "rb");
     if (!file)
@@ -393,7 +406,7 @@ int loadBinaryInputData(const char *filename, cfloat_t *buffer, size_t size)
         return 0;
     }
 
-    size_t items_read = fread(buffer, sizeof(cfloat_t), size, file);
+    size_t items_read = fread(buffer, sizeof(fxp16_t), size, file);
     if (items_read != size)
     {
         fprintf(stderr, "Error reading binary file: %s\n", filename);
@@ -469,7 +482,7 @@ spike_t *loadBinarySpikeData(const char *filename, size_t size)
 
 #ifdef PRINT_WnB
 
-void printWeightsMatrix(wfloat_t *W, unsigned int rows, unsigned int cols)
+void printWeightsMatrix(fxp8_t *W, unsigned int rows, unsigned int cols)
 {
     printf("Weights Matrix [%u x %u]:\n", rows, cols);
     for (unsigned int i = 0; i < rows; i++)
@@ -483,7 +496,7 @@ void printWeightsMatrix(wfloat_t *W, unsigned int rows, unsigned int cols)
     printf("\n");
 }
 
-void printBiasVector(wfloat_t *B, unsigned int size)
+void printBiasVector(fxp8_t *B, unsigned int size)
 {
     printf("Bias Vector [%u]:\n", size);
     for (unsigned int i = 0; i < size; i++)
@@ -523,7 +536,7 @@ int extractLabelFromFilename(const char *filename)
     return label;
 }
 
-void loadInputsFromFile(const char *filePath, cfloat_t *scratchpadMemory, size_t bufferSize)
+void loadInputsFromFile(const char *filePath, fxp16_t *scratchpadMemory, size_t bufferSize)
 {
     // Open the file for reading in binary mode
     FILE *file = fopen(filePath, "rb");
@@ -535,13 +548,13 @@ void loadInputsFromFile(const char *filePath, cfloat_t *scratchpadMemory, size_t
 
     // Temporary buffer to hold the int16_t data read from the file
     int16_t temp;
-    // Iterate over the buffer size, reading int16_t values and converting them to cfloat_t
+    // Iterate over the buffer size, reading int16_t values and converting them to fxp16_t
     for (size_t i = 0; i < bufferSize; ++i)
     {
         if (fread(&temp, sizeof(int16_t), 1, file) == 1)
         {
             // Convert and store in the scratchpad memory
-            scratchpadMemory[i] = (cfloat_t)temp;
+            scratchpadMemory[i] = (fxp16_t)temp;
         }
         else
         {
@@ -558,7 +571,7 @@ void loadInputsFromFile(const char *filePath, cfloat_t *scratchpadMemory, size_t
     fclose(file);
 }
 
-void loadTimestepFromFile(FILE *file, cfloat_t *scratchpadMemory, size_t timestepIndex)
+void loadTimestepFromFile(FILE *file, fxp16_t *scratchpadMemory, size_t timestepIndex)
 {
     size_t offset = timestepIndex * INPUT_STEP_SIZE;
     fseek(file, offset, SEEK_SET);
@@ -568,7 +581,7 @@ void loadTimestepFromFile(FILE *file, cfloat_t *scratchpadMemory, size_t timeste
     {
         if (fread(&temp, sizeof(int16_t), 1, file) == 1)
         {
-            scratchpadMemory[i] = (cfloat_t)temp;
+            scratchpadMemory[i] = (fxp16_t)temp;
         }
         else
         {

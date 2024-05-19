@@ -55,13 +55,13 @@ void run(model_t* model){
     /* Forward path */
     for(unsigned int i = 0; i < NUM_LAYERS; i++){
         if(strcmp(layer_type[i], "Linear") == 0){
-            model->floatOut.ptr  = scrachpad_memory;            
+            model->fxpOut.ptr  = scrachpad_memory;            
             model->layers[i].linear_ptr->matrixVectorMulSparse_fptr(&(model->layers[i].linear_ptr->W), 
                                                                     &(model->layers[i].linear_ptr->B),
-                                                                    &(model->floatOut));
+                                                                    &(model->fxpOut));
         }
         else if(strcmp(layer_type[i], "LIF") == 0){
-            model->layers[i].lif_ptr->computeOutput_fptr(model->layers[i].lif_ptr, &(model->floatOut));
+            model->layers[i].lif_ptr->computeOutput_fptr(model->layers[i].lif_ptr, &(model->fxpOut));
         }
     }
 

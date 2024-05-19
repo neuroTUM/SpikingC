@@ -16,11 +16,11 @@ extern "C" {
 /* A structure holding all relevant data for linear layers */
 typedef struct Linear{
     unsigned int layer_num;
-    wfloat_2d_array_t W;
-    wfloat_array_t B;
+    fxp8_2d_array_t W;
+    fxp8_array_t B;
     /* A pointer to the clearLinear function */
     void (*clearLinear_fptr) (struct Linear*);
-    void (*matrixVectorMulSparse_fptr) (wfloat_2d_array_t*, wfloat_array_t*, cfloat_array_t*);
+    void (*matrixVectorMulSparse_fptr) (fxp8_2d_array_t*, fxp8_array_t*, fxp16_array_t*);
 } linear_t;
 
 /**

@@ -33,7 +33,7 @@ unsigned int getOffset(unsigned int layer_num, char offsetType, const char* str)
  * @param layer_num The current layer number. The first layers is always marked with 0.
  * @return Returns a pointer pointing to the first element in the weight matrix for the given layer.
  */
-wfloat_t** returnWeightPtr(unsigned int layer_num);
+fxp8_t** returnWeightPtr(unsigned int layer_num);
 
 /**
  * Returns a pointer to the bias vector for a particular layer.
@@ -41,7 +41,7 @@ wfloat_t** returnWeightPtr(unsigned int layer_num);
  * @param layer_num The current layer number. The first layers is always marked with 0.
  * @return Returns a pointer pointing to the first element in the bias vector for the given layer.
  */
-wfloat_t* returnBiasPtr(unsigned int layer_num);
+fxp8_t* returnBiasPtr(unsigned int layer_num);
 
 /**
  * Returns a pointer to the vector of membrane potentials for a particular layer.
@@ -50,7 +50,7 @@ wfloat_t* returnBiasPtr(unsigned int layer_num);
  * @param layer_num The current layer number. The first layers is always marked with 0.
  * @return Returns a pointer pointing to the first element in the array of membrane potentials for the given layer.
  */
-cfloat_t* returnMemPotentialPtr(unsigned int layer_num);
+fxp16_t* returnMemPotentialPtr(unsigned int layer_num);
 
 /**
  * Performs matrix vector multiplication assuming floating point representation for weights and binary for spikes.
@@ -63,7 +63,7 @@ cfloat_t* returnMemPotentialPtr(unsigned int layer_num);
  * @param Out A structure containing the pointer to the first element of the array where outputs will be written.
  * @return Nothing is returned.
  */
-void matrixVectorMulSparse(wfloat_2d_array_t* W, wfloat_array_t* B, cfloat_array_t* Out);
+void matrixVectorMulSparse(fxp8_2d_array_t* W, fxp8_array_t* B, fxp16_array_t* Out);
 
 /**
  * Pushes an element to the front of a linked list.
@@ -92,7 +92,7 @@ void emptyList();
  * @param startIdx Starting index in the array where weights will be loaded.
  * @param elements Total number of weight elements to read from the file.
  */
-void loadCSVToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned int startIdx, unsigned int elements);
+void loadCSVToStaticWeightArray(const char *filepath, fxp8_t *W, unsigned int startIdx, unsigned int elements);
 
 /**
  * Loads bias values from a CSV file into a static array.
@@ -104,7 +104,7 @@ void loadCSVToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned int 
  * @param startIdx Starting index in the array where biases will be loaded.
  * @param size Total number of bias elements to read from the file.
  */
-void loadCSVToStaticBiasArray(const char *filepath, wfloat_t *B, unsigned int startIdx, unsigned int size);
+void loadCSVToStaticBiasArray(const char *filepath, fxp8_t *B, unsigned int startIdx, unsigned int size);
 
 /**
  * Initiates the loading of all weights and biases for the neural network from CSV files.
@@ -156,7 +156,7 @@ double simple_atof(const char *str);
  * @param startIdx Starting index in the array where weights will be loaded.
  * @param elements Total number of weight elements to read from the file.
  */
-void loadBinaryToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned int startIdx, unsigned int elements);
+void loadBinaryToStaticWeightArray(const char *filepath, fxp8_t *W, unsigned int startIdx, unsigned int elements);
 
 /**
  * Loads bias values from a binary file into a static array.
@@ -167,7 +167,7 @@ void loadBinaryToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned i
  * @param startIdx Starting index in the array where biases will be loaded.
  * @param size Total number of bias elements to read from the file.
  */
-void loadBinaryToStaticBiasArray(const char *filepath, wfloat_t *B, unsigned int startIdx, unsigned int size);
+void loadBinaryToStaticBiasArray(const char *filepath, fxp8_t *B, unsigned int startIdx, unsigned int size);
 
 /**
  * Initiates the loading of all weights and biases for the neural network from binary files.
@@ -185,7 +185,7 @@ void loadBinaryStaticWeightsAndBiases();
  * @param size The number of float elements expected in the buffer.
  * @return 1 on success, 0 on failure.
  */
-int loadBinaryInputData(const char *filename, cfloat_t *buffer, size_t size);
+int loadBinaryInputData(const char *filename, fxp16_t *buffer, size_t size);
 
 /**
  * Loads an array of floating-point data from a binary file. This function is designed to be used
@@ -223,7 +223,7 @@ spike_t *loadBinarySpikeData(const char *filename, size_t size);
  * @param rows Number of rows in the weight matrix.
  * @param cols Number of columns in the weight matrix.
  */
-void printWeightsMatrix(wfloat_t *W, unsigned int rows, unsigned int cols);
+void printWeightsMatrix(fxp8_t *W, unsigned int rows, unsigned int cols);
 
 /**
  * Prints a vector of biases to the console.
@@ -232,7 +232,7 @@ void printWeightsMatrix(wfloat_t *W, unsigned int rows, unsigned int cols);
  * @param B Pointer to the bias vector.
  * @param size Number of elements in the bias vector.
  */
-void printBiasVector(wfloat_t *B, unsigned int size);
+void printBiasVector(fxp8_t *B, unsigned int size);
 
 #endif
 
@@ -249,13 +249,13 @@ int extractLabelFromFilename(const char *filename);
 
 /**
  * Reads input data from a binary file and stores it into the scratchpad memory.
- * Assumes the binary file contains int16_t data to be converted to cfloat_t.
+ * Assumes the binary file contains int16_t data to be converted to fxp16_t.
  *
  * @param filePath Path to the binary file to read.
  * @param scratchpadMemory Pointer to the scratchpad memory where input data should be stored.
  * @param bufferSize Number of elements to read into the scratchpad memory.
  */
-void loadInputsFromFile(const char *filePath, cfloat_t *scratchpadMemory, size_t bufferSize);
+void loadInputsFromFile(const char *filePath, fxp16_t *scratchpadMemory, size_t bufferSize);
 
 /**
  * Reads input data for a specific timestep from a binary file and loads it into scratchpad memory.
@@ -266,7 +266,7 @@ void loadInputsFromFile(const char *filePath, cfloat_t *scratchpadMemory, size_t
  * @param scratchpadMemory Pointer to the scratchpad memory where input data for the timestep should be stored.
  * @param timestepIndex Index of the timestep to load.
  */
-void loadTimestepFromFile(FILE *file, cfloat_t *scratchpadMemory, size_t timestepIndex);
+void loadTimestepFromFile(FILE *file, fxp16_t *scratchpadMemory, size_t timestepIndex);
 
 #endif
 

@@ -8,7 +8,7 @@ int main(void)
     model_t SNN;
     initModel(&SNN);
 
-    cfloat_array_t In;
+    fxp16_array_t In;
     In.size = INPUT_SIZE;
     In.ptr = scrachpad_memory;
     if (!In.ptr)

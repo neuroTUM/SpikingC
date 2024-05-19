@@ -10,11 +10,11 @@ extern "C" {
 /* A structure holding all relevant data for LIF layers */
 typedef struct LIF{
     unsigned int layer_num;
-    cfloat_array_t U;
+    fxp16_array_t U;
     /* A pointer to the clearLIF function */
     void (*clearLIF_fptr) (struct LIF*);
     /* A pointer to the computeOutput function */
-    void (*computeOutput_fptr) (struct LIF*, cfloat_array_t*);
+    void (*computeOutput_fptr) (struct LIF*, fxp16_array_t*);
 } lif_t;
 
 /**
@@ -39,7 +39,7 @@ void clearLIF(lif_t* layer);
  * @param In A structure containing the pointer to the first element of the input vector consisting of floats used for this layer and its dimensions.
  * @return Nothing is returned.
  */
-void computeOutput(lif_t* layer, cfloat_array_t* In);
+void computeOutput(lif_t* layer, fxp16_array_t* In);
 
 #ifdef __cplusplus
 }

@@ -61,36 +61,34 @@ extern "C" {
 #define PATH_BIAS_FC3           "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias/fc3_bias.csv"
 #endif
 
-/* Floating point representation for network elements like membrane potentials, thresholds and beta values */
-typedef float cfloat_t;
+/* Fixed-point representation for network elements like membrane potentials, thresholds and beta values */
+typedef int16_t fxp16_t;
 
-/* Floating point representation for network parameters */
-typedef float wfloat_t;
-
-/* Data type used for representing spike data */
-typedef unsigned char spike_t;
+/* Fixed-point representation for network weights and biases */
+typedef int8_t fxp8_t;
 
 /* Network parameters */
 extern unsigned int layer_size[NUM_LAYERS + 1];
 extern char         layer_type[NUM_LAYERS][MAX_STR_LEN];
-extern cfloat_t     Beta[NUM_LAYERS];
-extern cfloat_t     threshold[NUM_LAYERS];
+extern char         Beta[NUM_LAYERS];                                       // "Real" beta is (2 >> Beat[i])
+extern fxp16_t     threshold[NUM_LAYERS];
+extern fxp16_t     L[NUM_LAYERS];
 
 /* Statically allocated memory for weights in column major order */
-extern wfloat_t W[INPUT_SIZE * L1_SIZE_OUT + 
+extern fxp8_t W[INPUT_SIZE * L1_SIZE_OUT + 
                   LIF1_SIZE * L2_SIZE_OUT  +
                   LIF2_SIZE * L3_SIZE_OUT];
 
 /* Statically allocated memory for biases */
-extern wfloat_t B[L1_SIZE_OUT  + 
+extern fxp8_t B[L1_SIZE_OUT  + 
                   L2_SIZE_OUT  + 
                   L3_SIZE_OUT];
 
 /* Statically allocated scrach pad memory used for inputs and outputs of linear layers*/
-extern cfloat_t scrachpad_memory[INPUT_SIZE + L1_SIZE_OUT];
+extern fxp16_t scrachpad_memory[INPUT_SIZE + L1_SIZE_OUT];
 
 /* Statically allocated memory for membrane potentials */
-extern cfloat_t mem_potential[LIF1_SIZE + LIF2_SIZE + LIF3_SIZE];
+extern fxp16_t mem_potential[LIF1_SIZE + LIF2_SIZE + LIF3_SIZE];
 
 /* Linked list used to store events */
 typedef struct event{
@@ -102,20 +100,20 @@ extern event_t* event_list;
 
 /* Structures for easier data handling */
 typedef struct{
-    wfloat_t** ptr;
+    fxp8_t** ptr;
     unsigned int rows;
     unsigned int cols;
-} wfloat_2d_array_t;
+} fxp8_2d_array_t;
 
 typedef struct{
-    wfloat_t* ptr;
+    fxp8_t* ptr;
     unsigned int size;
-} wfloat_array_t;
+} fxp8_array_t;
 
 typedef struct{
-    cfloat_t* ptr;
+    fxp16_t* ptr;
     unsigned int size;
-} cfloat_array_t;
+} fxp16_array_t;
 
 #ifdef __cplusplus
 }
