@@ -46,17 +46,19 @@ int main(void)
         }
 
         // Assume inputData[0] contains the input for this timestep
-        int cntZeors = 0;
         for (unsigned int j = 0; j < (unsigned int)cols && j < In.size; j++)
         {
-            In.ptr[j] = inputData[0][j];
-            if(In.ptr[j] == 0){
-                cntZeors++;
+            if(inputData[0][j] == 1){
+                pushToList(j);
+            }
+            else if(inputData[0][j] == 2){
+                pushToList(j);
+                pushToList(j);
             }
         }
 
         /* Run the model for one time step */
-        SNN.run_fptr(&SNN, &In);
+        SNN.run_fptr(&SNN);
 
         freeCSVData(inputData, rows);
         #else
@@ -97,8 +99,6 @@ int main(void)
         return -1;
     }
 
-
-
     while ((entry = readdir(dir)) != NULL)
     {
         if (entry->d_type == DT_REG && strstr(entry->d_name, ".bin") != NULL)
@@ -118,13 +118,25 @@ int main(void)
             for (unsigned int i = 0; i < TIME_STEPS; i++)
             {
                 loadTimestepFromFile(file, scrachpad_memory, i);
-                SNN.run_fptr(&SNN, &In);
+
+                /**********************************************************************************/
+                /* This code is necessary in order to transform the input vector
+                   into a list of events
+                */
+                for(unsigned int i = 0; i < INPUT_SIZE; i++){
+                    if(scrachpad_memory[i] == 1){
+                        pushToList(i);
+                    }
+                    else if(scrachpad_memory[i] == 2){
+                        pushToList(i);
+                        pushToList(i);
+                    }
+                }
+                /**********************************************************************************/
+
+                SNN.run_fptr(&SNN);
                 
             }
-            
-            //loadInputsFromFile(filePath, scrachpad_memory, INPUT_SIZE);
-
-            //SNN.run_fptr(&SNN, &In);
 
             int predictedLabel = SNN.predict_fptr(&SNN);
 

@@ -45,55 +45,32 @@ void resetState(model_t* model){
         mem_potential[i] = 0;
     }
 
-    unsigned int num_lif_layers = 0;
-    for(unsigned int i = 0; i < NUM_LAYERS; i++){
-        if(strcmp(layer_type[i], "LIF") == 0)
-            num_lif_layers++;
-    }
-
-    for(unsigned int i = 0; i < (offset / 8) + (num_lif_layers / 2); i++){
-        spike_memory[i] = 0;
-    }
-
     for(unsigned int i = 0; i < layer_size[NUM_LAYERS]; i++){
         model->actPred[i] = 0;
     }
 }
 
-void run(model_t* model, cfloat_array_t* In){
-    
+void run(model_t* model){
+
     /* Forward path */
     for(unsigned int i = 0; i < NUM_LAYERS; i++){
         if(strcmp(layer_type[i], "Linear") == 0){
-            model->floatOut.size = layer_size[i + 1];
-            if(i == 0){
-                model->floatOut.ptr  = &scrachpad_memory[INPUT_SIZE];           
-                model->layers[i].linear_ptr->matrixVectorMul_fptr(&(model->layers[i].linear_ptr->W), 
-                                                                  &(model->layers[i].linear_ptr->B),
-                                                                  In,
-                                                                  &(model->floatOut));
-            }
-            else{
-                model->floatOut.ptr  = scrachpad_memory;            
-                model->layers[i].linear_ptr->matrixVectorMulSparse_fptr(&(model->layers[i].linear_ptr->W), 
-                                                                    	&(model->layers[i].linear_ptr->B),
-                                                                        &(model->spikeOut),
-                                                                        &(model->floatOut));
-            }
+            model->floatOut.ptr  = scrachpad_memory;            
+            model->layers[i].linear_ptr->matrixVectorMulSparse_fptr(&(model->layers[i].linear_ptr->W), 
+                                                                    &(model->layers[i].linear_ptr->B),
+                                                                    &(model->floatOut));
         }
         else if(strcmp(layer_type[i], "LIF") == 0){
-            model->spikeOut.size = layer_size[i + 1];
-            model->spikeOut.ptr  = returnSpikePtr(i);
-            model->layers[i].lif_ptr->computeOutput_fptr(model->layers[i].lif_ptr, &(model->floatOut), &(model->spikeOut));
+            model->layers[i].lif_ptr->computeOutput_fptr(model->layers[i].lif_ptr, &(model->floatOut));
         }
     }
 
     /* Updated the active prediction array after each time step*/
-    for(unsigned int i = 0; i < layer_size[NUM_LAYERS]; i += (sizeof(spike_t) * 8)){
-        spike_t val = model->spikeOut.ptr[i / (sizeof(spike_t) * 8)];
-        for(unsigned int k = i; k < i + (sizeof(spike_t) * 8) && k < layer_size[NUM_LAYERS]; k++){
-            model->actPred[k] += BITVALUE(val, (k-i));
-        }
+    event_t* temp = event_list;
+    while(temp != NULL)
+    {
+        model->actPred[temp->position]++;
+        temp = temp->next;
     }
 }
 

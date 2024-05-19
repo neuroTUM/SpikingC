@@ -19,15 +19,9 @@ extern "C" {
 #define DATALOADER
 //#define PRINT_WnB
 
-
 #ifdef DATALOADER
 #include <dirent.h> // For directory operations
 #include <sys/types.h>
-#endif
-
-#ifdef TEST
-#include <math.h>
-#define PRECISION 1e-4
 #endif
 
 /* General macros */
@@ -95,9 +89,6 @@ extern wfloat_t B[L1_SIZE_OUT  +
 /* Statically allocated scrach pad memory used for inputs and outputs of linear layers*/
 extern cfloat_t scrachpad_memory[INPUT_SIZE + L1_SIZE_OUT];
 
-/* Statically allocated scrach pad memory used outputs of LIF layers*/
-extern spike_t spike_memory[((LIF1_SIZE + LIF2_SIZE + LIF3_SIZE) / 8) + (NUM_LAYERS / 2)];
-
 /* Statically allocated memory for membrane potentials */
 extern cfloat_t mem_potential[LIF1_SIZE + LIF2_SIZE + LIF3_SIZE];
 
@@ -107,7 +98,7 @@ typedef struct event{
     struct event* next;
 } event_t;
 
-extern event_t* event_list[NUM_LAYERS / 2];
+extern event_t* event_list;
 
 /* Structures for easier data handling */
 typedef struct{
@@ -125,11 +116,6 @@ typedef struct{
     cfloat_t* ptr;
     unsigned int size;
 } cfloat_array_t;
-
-typedef struct{
-    spike_t* ptr;
-    unsigned int size;
-} spike_array_t;
 
 #ifdef __cplusplus
 }

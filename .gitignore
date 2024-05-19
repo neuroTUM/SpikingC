@@ -58,5 +58,6 @@ Release_LLVM_full
 .vscode/
 Naive/
 chess.log
+/tests
 
 .vscode/

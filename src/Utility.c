@@ -25,10 +25,10 @@ unsigned int getOffset(unsigned int layer_num, char offset_type, const char* str
 
 wfloat_t** returnWeightPtr(unsigned int layer_num){
     wfloat_t** ptr;
-    ptr = (wfloat_t **)malloc(sizeof(wfloat_t*) * layer_size[layer_num + 1]);
+    ptr = (wfloat_t **)malloc(sizeof(wfloat_t*) * layer_size[layer_num]);
 
-    for(unsigned int i = 0; i < layer_size[layer_num + 1]; i++){
-        ptr[i] = &W[i * layer_size[layer_num] + getOffset(layer_num, 'M', "Linear")];
+    for(unsigned int i = 0; i < layer_size[layer_num]; i++){
+        ptr[i] = &W[i * layer_size[layer_num + 1] + getOffset(layer_num, 'M', "Linear")];
     }
     return ptr;
 }
@@ -39,27 +39,6 @@ wfloat_t* returnBiasPtr(unsigned int layer_num){
 
 cfloat_t* returnMemPotentialPtr(unsigned int layer_num){
     return &mem_potential[getOffset(layer_num, 'V', "LIF")];
-}
-
-spike_t* returnSpikePtr(unsigned int layer_num){
-    return &spike_memory[getOffset(layer_num, 'S', "LIF")];
-}
-
-void matrixVectorMul(wfloat_2d_array_t* W, wfloat_array_t* B, cfloat_array_t* In, cfloat_array_t* Out){
-
-    if((W->cols != In->size) || (W->rows != B->size) || (Out->size != B->size)){
-        printf("matrixVectorMul : Inappropriate dimensions\n"); 
-        exit(1);        
-    }
-
-    cfloat_t r;
-    for(unsigned int i = 0; i < W->rows; i++){
-        r = 0;
-        for(unsigned int j = 0; j < W->cols; j++){
-            r += W->ptr[i][j] * In->ptr[j];
-        }
-        Out->ptr[i] = r + B->ptr[i];
-    }
 }
 
 void matrixVectorMulSparse(wfloat_2d_array_t* W, wfloat_array_t* B, cfloat_array_t* Out){
@@ -76,7 +55,7 @@ void matrixVectorMulSparse(wfloat_2d_array_t* W, wfloat_array_t* B, cfloat_array
     {
         /* Add the whole columns element-wise to the output vector */
         for(unsigned int i = 0; i < W->rows; i++){
-            Out->ptr[i] += W->ptr[i][temp->position];
+            Out->ptr[i] += W->ptr[temp->position][i];
         }
         temp = temp->next;
     }
@@ -84,6 +63,9 @@ void matrixVectorMulSparse(wfloat_2d_array_t* W, wfloat_array_t* B, cfloat_array
 
 bool pushToList(unsigned int el){
     if(event_list == NULL){
+        event_list = (event_t*)malloc(sizeof(event_t));
+        if(event_list == NULL)
+            return false;
         event_list->position = el;
         event_list->next = NULL;
         return true;

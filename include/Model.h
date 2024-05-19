@@ -31,11 +31,10 @@ typedef struct Model{
     /* A pointer to an array of layers */
     layer_instance_t* layers;
     cfloat_array_t floatOut;
-    spike_array_t spikeOut;
     unsigned int *actPred;
     void (*clearModel_fptr) (struct Model*);
     void (*resetState_fptr) (struct Model*);
-    void (*run_fptr) (struct Model*, cfloat_array_t*);
+    void (*run_fptr) (struct Model*);
     unsigned int (*predict_fptr) (struct Model*);
 } model_t;
 
@@ -63,10 +62,9 @@ void resetState(model_t*);
 /**
  * Implements the forward path for one time step.
  * @param model A pointer to a structure representing a model.
- * @param In A structure containing information for accessing input data.
  * @return Nothing is returned.
  */
-void run(model_t*, cfloat_array_t*);
+void run(model_t*);
 
 /**
  * Predicts the output based on the active prediction arrays.

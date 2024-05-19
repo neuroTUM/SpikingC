@@ -53,28 +53,6 @@ wfloat_t* returnBiasPtr(unsigned int layer_num);
 cfloat_t* returnMemPotentialPtr(unsigned int layer_num);
 
 /**
- * Returns a pointer to the vector of spikes for a particular layer.
- * Spikes are stored as 1-bit values inside a bigger data type. Hence accessing individual spikes requires additional functions.
- * This function is responsible for finding the first element and returning its address. The first element is always to be found at the LSB position of the underlaying data type used for storing spikes.
- * 
- * @param layer_num The current layer number. The first layers is always marked with 0.
- * @return Returns a pointer pointing to the array element containing the first spike value for the given layer.
- */
-spike_t* returnSpikePtr(unsigned int layer_num);
-
-/**
- * Performs matrix vector multiplication assuming floating point representation for both matrices.
- * This is necessary for the first layer because the inputs are not necessaraly ones and zeros.
- * 
- * @param W A structure containing the pointer to the first element of the weight matrix used for this layer and its dimensions.
- * @param B A structure containing the pointer to the first element of the bias vector used for this layer and its dimensions.
- * @param In A structure containing the pointer to the first element of the input vector consisting of floats used for this layer and its dimensions. This is usually the input to the whole network.
- * @param Out A structure containing the pointer to the first element of the array where outputs will be written.
- * @return Nothing is returned.
- */
-void matrixVectorMul(wfloat_2d_array_t* W, wfloat_array_t* B, cfloat_array_t* In, cfloat_array_t* Out);
-
-/**
  * Performs matrix vector multiplication assuming floating point representation for weights and binary for spikes.
  * This function is an optimized version of the standard matrix-vector multiplication because it takes input sparsity into account.
  * If all bits in the element containing spike events are zero then the corresponding computations can be skipped.

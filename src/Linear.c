@@ -14,6 +14,5 @@ void initLinear(linear_t* layer, unsigned int layer_num){
     layer->B.ptr                        	= returnBiasPtr(layer_num);
     layer->B.size                       	= layer_size[layer_num + 1];
     layer->clearLinear_fptr             	= &clearLinear;
-    layer->matrixVectorMul_fptr             = &matrixVectorMul;
     layer->matrixVectorMulSparse_fptr       = &matrixVectorMulSparse;
 }
