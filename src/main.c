@@ -31,6 +31,8 @@ void LIF(cfloat_array_t* In, spike_array_t* Out, cfloat_array_t* U, unsigned int
 int main(void)
 {
 
+    int num_inputs = 10;
+
     // Load weights and biases
     loadBinaryStaticWeightsAndBiases();
 
@@ -62,11 +64,11 @@ int main(void)
     U1.ptr = returnMemPotentialPtr(1);
     U1.size = layer_size[1];
     cfloat_array_t U2;
-    U2.ptr = returnMemPotentialPtr(1);
-    U2.size = layer_size[1];
+    U2.ptr = returnMemPotentialPtr(3);
+    U2.size = layer_size[3];
     cfloat_array_t U3;
-    U3.ptr = returnMemPotentialPtr(1);
-    U3.size = layer_size[1];
+    U3.ptr = returnMemPotentialPtr(5);
+    U3.size = layer_size[5];
 
     // Array used for storing prediction results
     unsigned int actPred[LIF3_SIZE];
@@ -93,7 +95,7 @@ int main(void)
         return -1;
     }
 
-    while ((entry = readdir(dir)) != NULL)
+    while ((entry = readdir(dir)) != NULL && (num_inputs > 0))
     {
         if (entry->d_type == DT_REG && strstr(entry->d_name, ".bin") != NULL)
         {
@@ -166,6 +168,7 @@ int main(void)
             printf("Processed %s: Predicted class = %d, True Label = %d\n", entry->d_name, predictedLabel, trueLabel);
             
             fclose(file);
+            num_inputs--;
         }
     }
 
