@@ -12,6 +12,6 @@ wfloat_t        W[INPUT_SIZE * L1_SIZE_OUT  +
 wfloat_t        B[L1_SIZE_OUT  + 
                   L2_SIZE_OUT  + 
                   L3_SIZE_OUT];
-cfloat_t        scrachpad_memory[INPUT_SIZE + L1_SIZE_OUT];
-spike_t         spike_memory[((LIF1_SIZE + LIF2_SIZE + LIF3_SIZE) / 8) + (NUM_LAYERS / 2)];
+spike_t         scrachpad_memory_spikes[INPUT_SIZE];
+cfloat_t        scrachpad_memory_floats[L1_SIZE_OUT];
 cfloat_t        mem_potential[LIF1_SIZE + LIF2_SIZE + LIF3_SIZE];

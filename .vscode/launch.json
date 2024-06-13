@@ -8,10 +8,10 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/target/Debug/SpikingCpp",
+            "program": "${workspaceFolder}/target/Debug/SpikingC",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/target/Debug",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -26,8 +26,7 @@
                     "text": "-gdb-set disassembly-flavor intel",
                     "ignoreFailures": true
                 }
-            ],
-            "preLaunchTask": "build"
+            ]
         }
 
     ]
