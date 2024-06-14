@@ -11,3 +11,42 @@ To load data from the binary files BINARY_IMPLEMENTATION has to be defined. If t
 
 To measure the execution time just run the program as follows(linux only):
 time ./SpikingC
+
+```
+├── CMakeLists.txt
+├── Makefile
+├── README.md
+├── include
+│   ├── LIF.h
+│   ├── Linear.h
+│   ├── Model.h
+│   ├── SNNconfig.h # configuration of the application
+│   └── Utility.h
+├── models # saved models for inference
+│   └── SNN_3L_simple_LIF_NMNIST
+│       ├── intermediate_outputs
+│       │   ├── fc1
+│       │   │   ├── fc1_outputs_timestep_0.csv
+│       │   │   │ ...
+├── notebooks  # python notebooks for training, testing, prunning and quantzation
+├── src
+│   ├── LIF.c
+│   ├── Linear.c
+│   ├── Model.c
+│   ├── SNNconfig.c
+│   ├── Utility.c
+│   └── main.c
+```
+
+| Macro       | Description                | Value |
+|-------------|----------------------------|-------|
+| TIME_STEPS  | Number of time steps       | 31    |
+| CHANNELS    | Number of input channels   | 2     |
+| HEIGHT      | Height of input images     | 34    |
+| WIDTH       | Width of input images      | 34    |
+| NUM_LAYERS  | Number of layers in the network | 6 |
+| INPUT_SIZE  | Total size of the input layer | 2312 |
+| TEST        | Does one pass of single input and test intermedia results | FALSE |
+| DATALODER   | Use whole test dataset in inference mode | TRUE |
+
+
