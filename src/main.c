@@ -31,7 +31,7 @@ void LIF(cfloat_array_t* In, spike_array_t* Out, cfloat_array_t* U, unsigned int
 int main(void)
 {
 
-    int num_inputs = 10;
+    //unsigned int num_inputs = 10;
 
     // Load weights and biases
     loadBinaryStaticWeightsAndBiases();
@@ -82,97 +82,97 @@ int main(void)
     MatrixResult.size = L1_SIZE_OUT;
     MatrixResult.ptr = scrachpad_memory_floats;
 
-    const char *dataTestDirectory = PATH_BIN_DATA;
-    DIR *dir;
-    struct dirent *entry;
+    //const char *dataTestDirectory = PATH_BIN_DATA;
+    //DIR *dir;
+    //struct dirent *entry;
 
     unsigned int totalPredictions = 0;
     unsigned int correctPredictions = 0;
 
-    if ((dir = opendir(dataTestDirectory)) == NULL)
+    char filename[256];
+    // crate an array with specific numbers
+    int numbers[10] = {4890, 7962, 6453, 9978, 715, 3528, 8092, 1692, 4880, 2901};
+    //for (unsigned int i = 0; i < num_inputs; i++)
+    //{
+        
+    for (unsigned int label = 0; label < 10; label++)
     {
-        perror("Failed to open directory");
-        return -1;
-    }
+        //char filePath[1024];
+        //snprintf(filePath, sizeof(filePath), "%s/%s", dataTestDirectory, entry->d_name);
+        unsigned int tuki_file = numbers[label];
 
-    while ((entry = readdir(dir)) != NULL && (num_inputs > 0))
-    {
-        if (entry->d_type == DT_REG && strstr(entry->d_name, ".bin") != NULL)
+        int trueLabel = label;//extractLabelFromFilename(entry->d_name);
+        sprintf(filename, "/home/copparihollmann/neuroTUM/NMNIST/NMNIST_testset_bin/%u_%u.bin", tuki_file, label);
+
+        FILE *file = fopen(filename, "rb");
+        if (!file)
         {
-            char filePath[1024];
-            snprintf(filePath, sizeof(filePath), "%s/%s", dataTestDirectory, entry->d_name);
+            perror("Failed to open file");
+            return -1;
+        }  
 
-            int trueLabel = extractLabelFromFilename(entry->d_name);
+        // Reset for membrane potentials, spikes and prediction results
+        for(unsigned int i = 0; i < INPUT_SIZE; i++)
+            scrachpad_memory_spikes[i] = 0;
 
-            FILE *file = fopen(filePath, "rb");
-            if (!file)
-            {
-                perror("Failed to open file");
-                return -1;
-            }  
+        for(unsigned int i = 0; i < L1_SIZE_OUT; i++)
+            scrachpad_memory_floats[i] = 0;
 
-            // Reset for membrane potentials, spikes and prediction results
-            for(unsigned int i = 0; i < INPUT_SIZE; i++)
-                scrachpad_memory_spikes[i] = 0;
+        for(unsigned int i = 0; i < LIF3_SIZE; i++)
+            actPred[i] = 0;                
 
-            for(unsigned int i = 0; i < L1_SIZE_OUT; i++)
-                scrachpad_memory_floats[i] = 0;
+        for(unsigned int i = 0; i < TIME_STEPS; i++)
+        {
+            Spikes.size = INPUT_SIZE;
+            loadTimestepFromFile(file, i);
 
+            // Linear layer 1
+            MatrixResult.size = L1_SIZE_OUT;
+            matrixVectorMul(&W1, &B1, &Spikes, &MatrixResult);
+            // LIF layer 1
+            Spikes.size = LIF1_SIZE;
+            LIF(&MatrixResult, &Spikes, &U1, 1);
+            // Linear layer 2
+            MatrixResult.size = L2_SIZE_OUT;
+            matrixVectorMul(&W2, &B2, &Spikes, &MatrixResult);
+            // LIF layer 2
+            Spikes.size = LIF2_SIZE;
+            LIF(&MatrixResult, &Spikes, &U2, 3);
+            // Linear layer 3
+            MatrixResult.size = L3_SIZE_OUT;
+            matrixVectorMul(&W3, &B3, &Spikes, &MatrixResult);
+            // LIF layer 3
+            Spikes.size = LIF3_SIZE;
+            LIF(&MatrixResult, &Spikes, &U3, 5);
+
+            // Accumulating prediction results
             for(unsigned int i = 0; i < LIF3_SIZE; i++)
-                actPred[i] = 0;                
-
-            for(unsigned int i = 0; i < TIME_STEPS; i++)
-            {
-                Spikes.size = INPUT_SIZE;
-                loadTimestepFromFile(file, i);
-
-                // Linear layer 1
-                MatrixResult.size = L1_SIZE_OUT;
-                matrixVectorMul(&W1, &B1, &Spikes, &MatrixResult);
-                // LIF layer 1
-                Spikes.size = LIF1_SIZE;
-                LIF(&MatrixResult, &Spikes, &U1, 1);
-                // Linear layer 2
-                MatrixResult.size = L2_SIZE_OUT;
-                matrixVectorMul(&W2, &B2, &Spikes, &MatrixResult);
-                // LIF layer 2
-                Spikes.size = LIF2_SIZE;
-                LIF(&MatrixResult, &Spikes, &U2, 3);
-                // Linear layer 3
-                MatrixResult.size = L3_SIZE_OUT;
-                matrixVectorMul(&W3, &B3, &Spikes, &MatrixResult);
-                // LIF layer 3
-                Spikes.size = LIF3_SIZE;
-                LIF(&MatrixResult, &Spikes, &U3, 5);
-
-                // Accumulating prediction results
-                for(unsigned int i = 0; i < LIF3_SIZE; i++)
-                    actPred[i] += Spikes.ptr[i];
-            }
-
-            int predictedLabel = 0;
-            unsigned int max = actPred[0];
-            for(unsigned int i = 1; i < LIF3_SIZE; i++){
-                if(actPred[i] > max){
-                    predictedLabel = i;
-                    max = actPred[i];
-                }
-            }
-
-            if (predictedLabel == trueLabel)
-            {
-                correctPredictions++;
-            }
-            totalPredictions++;
-
-            printf("Processed %s: Predicted class = %d, True Label = %d\n", entry->d_name, predictedLabel, trueLabel);
-            
-            fclose(file);
-            num_inputs--;
+                actPred[i] += Spikes.ptr[i];
         }
-    }
 
-    closedir(dir);
+        int predictedLabel = 0;
+        unsigned int max = actPred[0];
+        for(unsigned int i = 1; i < LIF3_SIZE; i++){
+            if(actPred[i] > max){
+                predictedLabel = i;
+                max = actPred[i];
+            }
+        }
+
+        if (predictedLabel == trueLabel)
+        {
+            correctPredictions++;
+        }
+        totalPredictions++;
+
+        printf("Processed %s: Predicted class = %d, True Label = %d\n", filename, predictedLabel, trueLabel);
+
+        fclose(file);
+        //num_inputs--;
+    }
+    //}
+
+    //closedir(dir);
 
     if (totalPredictions > 0)
     {
