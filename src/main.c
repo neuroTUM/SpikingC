@@ -184,5 +184,8 @@ int main(void)
         printf("No .bin files processed.\n");
     }
 
+    free(W1.ptr);
+    free(W2.ptr);
+    free(W3.ptr);
     return 0;
 }
