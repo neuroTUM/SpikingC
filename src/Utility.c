@@ -48,32 +48,13 @@ void loadBinaryToStaticWeightArray(const char *filepath, wfloat_t *W, unsigned i
         return;
     }
 
-    // Allocate a temporary buffer to hold float values
-    float *tempBuffer = (float *)malloc(elements * sizeof(float));
-    if (tempBuffer == NULL)
-    {
-        fprintf(stderr, "Memory allocation failed for temporary buffer\n");
-        fclose(file);
-        return;
-    }
-
     // Read the binary data into the temporary buffer
-    size_t readItems = fread(tempBuffer, sizeof(float), elements, file);
+    size_t readItems = fread(W + startIdx, sizeof(float), elements, file);
     if (readItems != elements)
     {
         fprintf(stderr, "Failed to read the expected number of weight elements from %s\n", filepath);
     }
-    else
-    {
-        // Convert from float to double and assign to the target array
-        for (unsigned int i = 0; i < elements; i++)
-        {
-            W[startIdx + i] = (wfloat_t)tempBuffer[i];
-        }
-    }
 
-    // Free the temporary buffer and close the file
-    free(tempBuffer);
     fclose(file);
 }
 
@@ -86,28 +67,12 @@ void loadBinaryToStaticBiasArray(const char *filepath, wfloat_t *B, unsigned int
         return;
     }
 
-    float *tempBuffer = (float *)malloc(size * sizeof(float));
-    if (tempBuffer == NULL)
-    {
-        fprintf(stderr, "Memory allocation failed for temporary buffer\n");
-        fclose(file);
-        return;
-    }
-
-    size_t readItems = fread(tempBuffer, sizeof(float), size, file);
+    size_t readItems = fread(B + startIdx, sizeof(float), size, file);
     if (readItems != size)
     {
         fprintf(stderr, "Failed to read the expected number of bias elements from %s\n", filepath);
     }
-    else
-    {
-        for (unsigned int i = 0; i < size; i++)
-        {
-            B[startIdx + i] = (wfloat_t)tempBuffer[i];
-        }
-    }
 
-    free(tempBuffer);
     fclose(file);
 }
 
