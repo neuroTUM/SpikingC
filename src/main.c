@@ -102,7 +102,7 @@ int main(void)
         unsigned int tuki_file = numbers[label];
 
         int trueLabel = label;//extractLabelFromFilename(entry->d_name);
-        sprintf(filename, "/home/copparihollmann/neuroTUM/NMNIST/NMNIST_testset_bin/%u_%u.bin", tuki_file, label);
+        sprintf(filename, "/home/aleksa_tum/main/neuroTUM/Cpp_SNN_framework/SpikingCpp/tests/NMNIST_testset_bin/%u_%u.bin", tuki_file, label);
 
         FILE *file = fopen(filename, "rb");
         if (!file)
@@ -183,6 +183,10 @@ int main(void)
     {
         printf("No .bin files processed.\n");
     }
+
+    free(W1.ptr);
+    free(W2.ptr);
+    free(W3.ptr);
 
     return 0;
 }
