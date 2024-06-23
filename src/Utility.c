@@ -39,41 +39,6 @@ fxp16_t* returnMemPotentialPtr(unsigned int layer_num){
     return &mem_potential[getOffset(layer_num, 'V', "LIF")];
 }
 
-void matrixVectorMulSparse(fxp8_2d_array_t* W, fxp8_array_t* B, fxp16_array_t* Out){
-
-    event_t* temp = event_list;
-
-    /* Initialize all elements in Out with values from B */
-    for(unsigned int i = 0; i < B->size; i++){
-        Out->ptr[i] = B->ptr[i];
-    }
-
-    /* Traverse through all non-zero elements */
-    while(temp != NULL)
-    {
-        /* Add the whole columns element-wise to the output vector */
-        for(unsigned int i = 0; i < W->rows; i++){
-
-            /* IMPORTANT: All checks for over/underflow are a part of the custom instruction and shouldn't be
-                        visible in the C code. Here I only want to simulate the effect those instructions will 
-                        have once they are implemented.
-            */            
-
-            /* Saturate the output value if it goes outside of the predefined range */
-            if((int)Out->ptr[i] + (int)W->ptr[temp->position][i] < INT16_MIN){
-                Out->ptr[i] = INT16_MIN;
-            }
-            else if((int)Out->ptr[i] + (int)W->ptr[temp->position][i] > INT16_MAX){
-                Out->ptr[i] = INT16_MAX;
-            }
-            else{
-                Out->ptr[i] += W->ptr[temp->position][i];
-            }
-        }
-        temp = temp->next;
-    }
-}
-
 bool pushToList(unsigned int el){
     if(event_list == NULL){
         event_list = (event_t*)malloc(sizeof(event_t));
@@ -476,34 +441,6 @@ spike_t *loadBinarySpikeData(const char *filename, size_t size)
 
     fclose(file);
     return data;
-}
-
-#endif
-
-#ifdef PRINT_WnB
-
-void printWeightsMatrix(fxp8_t *W, unsigned int rows, unsigned int cols)
-{
-    printf("Weights Matrix [%u x %u]:\n", rows, cols);
-    for (unsigned int i = 0; i < rows; i++)
-    {
-        for (unsigned int j = 0; j < cols; j++)
-        {
-            printf("%.4f ", W[i * cols + j]);
-        }
-        printf("\n");
-    }
-    printf("\n");
-}
-
-void printBiasVector(fxp8_t *B, unsigned int size)
-{
-    printf("Bias Vector [%u]:\n", size);
-    for (unsigned int i = 0; i < size; i++)
-    {
-        printf("%.4f ", B[i]);
-    }
-    printf("\n\n");
 }
 
 #endif

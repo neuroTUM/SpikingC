@@ -53,19 +53,6 @@ fxp8_t* returnBiasPtr(unsigned int layer_num);
 fxp16_t* returnMemPotentialPtr(unsigned int layer_num);
 
 /**
- * Performs matrix vector multiplication assuming floating point representation for weights and binary for spikes.
- * This function is an optimized version of the standard matrix-vector multiplication because it takes input sparsity into account.
- * If all bits in the element containing spike events are zero then the corresponding computations can be skipped.
- * 
- * @param W A structure containing the pointer to the first element of the weight matrix used for this layer and its dimensions.
- * @param B A structure containing the pointer to the first element of the bias vector used for this layer and its dimensions.
- * @param In A structure containing the pointer to the first element of the input vector consisting of spike events used for this layer and its dimensions.
- * @param Out A structure containing the pointer to the first element of the array where outputs will be written.
- * @return Nothing is returned.
- */
-void matrixVectorMulSparse(fxp8_2d_array_t* W, fxp8_array_t* B, fxp16_array_t* Out);
-
-/**
  * Pushes an element to the front of a linked list.
  * 
  * @param el The value that has to be pushed
@@ -210,29 +197,6 @@ float *loadBinaryFloatData(const char *filename, size_t size);
  * @note This function allocates memory for the returned array and the caller must free it.
  */
 spike_t *loadBinarySpikeData(const char *filename, size_t size);
-
-#endif
-
-#ifdef PRINT_WnB
-
-/**
- * Prints a matrix of weights to the console for debugging or analysis purposes.
- * This function iterates over rows and columns of the weight matrix, printing each element in a formatted manner.
- *
- * @param W Pointer to the weight matrix.
- * @param rows Number of rows in the weight matrix.
- * @param cols Number of columns in the weight matrix.
- */
-void printWeightsMatrix(fxp8_t *W, unsigned int rows, unsigned int cols);
-
-/**
- * Prints a vector of biases to the console.
- * Each bias is printed on a new line, with formatting to ensure clarity and ease of reading.
- *
- * @param B Pointer to the bias vector.
- * @param size Number of elements in the bias vector.
- */
-void printBiasVector(fxp8_t *B, unsigned int size);
 
 #endif
 

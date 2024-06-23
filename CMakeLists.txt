@@ -4,7 +4,7 @@ project(SpikingC C) # Specify the project as a C project
 set(CMAKE_C_STANDARD 99)
 
 # flags for all builds
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -pedantic")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic")
 
 # flags for debug builds (in addition to cmake defaults)
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g -O0 -fsanitize=address -fsanitize=undefined -fsanitize=leak")

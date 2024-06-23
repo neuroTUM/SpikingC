@@ -71,8 +71,8 @@ typedef int8_t fxp8_t;
 extern unsigned int layer_size[NUM_LAYERS + 1];
 extern char         layer_type[NUM_LAYERS][MAX_STR_LEN];
 extern char         Beta[NUM_LAYERS];                                       // "Real" beta is (2 >> Beat[i])
-extern fxp16_t     threshold[NUM_LAYERS];
-extern fxp16_t     L[NUM_LAYERS];
+extern fxp16_t      threshold[NUM_LAYERS];
+extern fxp16_t      L[NUM_LAYERS];
 
 /* Statically allocated memory for weights in column major order */
 extern fxp8_t W[INPUT_SIZE * L1_SIZE_OUT + 

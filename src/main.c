@@ -1,91 +1,147 @@
-#include "../include/Model.h"
 #include "../include/Utility.h"
 
 #define PATH_BIN_DATA "/home/aleksa_tum/main/neuroTUM/Cpp_SNN_framework/SpikingCpp/tests/NMNIST_testset_bin"
 
+void matrixVectorMulSparse(fxp8_2d_array_t* W, fxp8_array_t* B, fxp16_array_t* Out){
+
+    event_t* temp = event_list;
+
+    /* Initialize all elements in Out with values from B */
+    for(unsigned int i = 0; i < B->size; i++){
+        Out->ptr[i] = B->ptr[i];
+    }
+
+    /* Traverse through all non-zero elements */
+    while(temp != NULL)
+    {
+        /* Add the whole columns element-wise to the output vector */
+        for(unsigned int i = 0; i < W->rows; i++){
+
+            /* IMPORTANT: All checks for over/underflow are a part of the custom instruction and shouldn't be
+                        visible in the C code. Here I only want to simulate the effect those instructions will 
+                        have once they are implemented.
+            */            
+
+            /* Saturate the output value if it goes outside of the predefined range */
+            if((int)Out->ptr[i] + (int)W->ptr[temp->position][i] < INT16_MIN){
+                Out->ptr[i] = INT16_MIN;
+            }
+            else if((int)Out->ptr[i] + (int)W->ptr[temp->position][i] > INT16_MAX){
+                Out->ptr[i] = INT16_MAX;
+            }
+            else{
+                Out->ptr[i] += W->ptr[temp->position][i];
+            }
+        }
+        temp = temp->next;
+    }
+}
+
+void LIF(fxp16_array_t* In, fxp16_array_t* U, unsigned int layer_num){
+
+    bool spike;
+    emptyList();
+    for(unsigned int i = 0; i < U->size; i++){
+        if(U->ptr[i] > threshold[layer_num]){
+            spike = 1;
+            pushToList(i);
+        }
+        else{
+            spike = 0;
+        }
+
+        /* IMPORTANT: All checks for over/underflow are a part of the custom instruction and shouldn't be
+                      visible in the C code. Here I only want to simulate the effect those instructions will 
+                      have once they are implemented.
+        */
+
+        /* When performing the shifht right operation we don't have to worry about over/underflow */
+        U->ptr[i] = (U->ptr[i] >> Beta[layer_num]);
+        
+        /* Check for underflow */
+        if(((int)U->ptr[i] - (int)(spike * L[layer_num])) < INT16_MIN){
+            U->ptr[i] = INT16_MIN;
+        }
+        else{
+            U->ptr[i] -= spike * L[layer_num];
+        }
+
+        /* Saturate the synaptic current if it goes outside of the predefined range */
+        int temp = In->ptr[i] * 2;
+        if(temp < INT16_MIN){
+            In->ptr[i] = INT16_MIN;
+        }
+        else if(temp > INT16_MAX){
+            In->ptr[i] = INT16_MAX;
+        }
+        else{
+            In->ptr[i] = In->ptr[i] * 2;
+        }
+
+        /* Saturate the membrane potential value if it goes outside of the predefined range */
+        if((int)U->ptr[i] + (int)In->ptr[i] < INT16_MIN){
+            U->ptr[i] = INT16_MIN;
+        }
+        else if((int)U -> ptr[i] + (int)In->ptr[i] > INT16_MAX){
+            U->ptr[i] = INT16_MAX;
+        }
+        else{
+            U->ptr[i] += In->ptr[i];
+        }
+    }
+}
+
 int main(void)
 {
-    model_t SNN;
-    initModel(&SNN);
 
-    fxp16_array_t In;
-    In.size = INPUT_SIZE;
-    In.ptr = scrachpad_memory;
-    if (!In.ptr)
-    {
-        perror("Failed to allocate memory for input");
-        return -1;
-    }
-
-    #ifndef BINARY_IMPLEMENTATION
-    /* Load weights and biases */
+    // Load weights and biases
     loadStaticWeightsAndBiases();
-    #else
-    /* Load BINARY weights and biases */
-    loadBinaryStaticWeightsAndBiases();
-    #endif
 
-    /* Reset the state */
-    SNN.resetState_fptr(&SNN);
-    
-    #ifdef TEST
-    char filename[256];
-    for (unsigned int i = 0; i < TIME_STEPS; i++)
-    {
-        #ifndef BINARY_IMPLEMENTATION
-        // Construct the filename for the current timestep
-        sprintf(filename, "../../models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs/input/inputs_timestep_%u.csv", i);
+    // Weights and biases
+    fxp8_2d_array_t W1;
+    W1.ptr = returnWeightPtr(0);
+    W1.rows = layer_size[1];
+    W1.cols = layer_size[0];
+    fxp8_array_t B1;
+    B1.ptr = returnBiasPtr(0);
+    B1.size	= layer_size[1];
+    fxp8_2d_array_t W2;
+    W2.ptr = returnWeightPtr(2);
+    W2.rows = layer_size[3];
+    W2.cols = layer_size[2];
+    fxp8_array_t B2;
+    B2.ptr = returnBiasPtr(2);
+    B2.size	= layer_size[3];
+    fxp8_2d_array_t W3;
+    W3.ptr = returnWeightPtr(4);
+    W3.rows = layer_size[5];
+    W3.cols = layer_size[4];
+    fxp8_array_t B3;
+    B3.ptr = returnBiasPtr(4);
+    B3.size	= layer_size[5];
 
-        // Load the data for this time step
-        int rows, cols;
-        float **inputData = readCSV(filename, &rows, &cols);
-        if (!inputData || rows < 1)
-        {
-            fprintf(stderr, "Failed to load input data for timestep %u\n", i);
-            exit(1);
-        }
+    // Membrane potentials
+    fxp16_array_t U1;
+    U1.ptr = returnMemPotentialPtr(1);
+    U1.size = layer_size[1];
+    fxp16_array_t U2;
+    U2.ptr = returnMemPotentialPtr(3);
+    U2.size = layer_size[3];
+    fxp16_array_t U3;
+    U3.ptr = returnMemPotentialPtr(5);
+    U3.size = layer_size[5];
 
-        // Assume inputData[0] contains the input for this timestep
-        for (unsigned int j = 0; j < (unsigned int)cols && j < In.size; j++)
-        {
-            if(inputData[0][j] == 1){
-                pushToList(j);
-            }
-            else if(inputData[0][j] == 2){
-                pushToList(j);
-                pushToList(j);
-            }
-        }
+    // Matrix multiplication result
+    fxp16_array_t matmul_out;
+    matmul_out.ptr = scrachpad_memory;
 
-        /* Run the model for one time step */
-        SNN.run_fptr(&SNN);
+    // Array used for storing prediction results
+    unsigned int actPred[LIF3_SIZE];
 
-        freeCSVData(inputData, rows);
-        #else
-        // Construct the filename for the current timestep
-        sprintf(filename, "../../models/SNN_3L_simple_LIF_NMNIST/intermediate_outputs_binary/inputs/inputs_timestep_%u.bin", i);
+    // ----------------------------------------------------------------------------------------------- //
+    // ---------------------------------------- Data loading ----------------------------------------- //
+    // ----------------------------------------------------------------------------------------------- //
 
-        // Load the data for this time step
-        if (!loadBinaryInputData(filename, In.ptr, In.size))
-        {
-            fprintf(stderr, "Failed to load input data for timestep %u\n", i);
-            exit(1);
-        }
-        /* Run the model for one time step */
-        SNN.run_fptr(&SNN, &In);
-        #endif
-
-        
-    }
-
-    printf("Predicted class is: %d\n", SNN.predict_fptr(&SNN));
-
-
-    /* Free memory allocated for SNN */
-    SNN.clearModel_fptr(&SNN);
-    #endif
-
-    #ifdef DATALOADER
     const char *dataTestDirectory = PATH_BIN_DATA;
     DIR *dir;
     struct dirent *entry;
@@ -115,9 +171,23 @@ int main(void)
                 return -1;
             }  
 
+            // Reset the membrane potential
+            for(unsigned int i = 0; i < LIF1_SIZE + LIF2_SIZE + LIF3_SIZE; i++)
+                mem_potential[i] = 0;
+
+            // Empty the list
+            emptyList();
+
+            for(unsigned int i = 0; i < LIF3_SIZE; i++)
+                actPred[i] = 0;  
+
             for (unsigned int i = 0; i < TIME_STEPS; i++)
             {
                 loadTimestepFromFile(file, scrachpad_memory, i);
+
+                // ----------------------------------------------------------------------------------------------- //
+                // --------------------------------------- Data processing --------------------------------------- //
+                // ----------------------------------------------------------------------------------------------- //
 
                 /**********************************************************************************/
                 /* This code is necessary in order to transform the input vector
@@ -134,11 +204,38 @@ int main(void)
                 }
                 /**********************************************************************************/
 
-                SNN.run_fptr(&SNN);
+                matmul_out.size = L1_SIZE_OUT;
+                matrixVectorMulSparse(&W1, &B1, &matmul_out);
+                LIF(&matmul_out, &U1, 1);
+                matmul_out.size = L2_SIZE_OUT;
+                matrixVectorMulSparse(&W2, &B2, &matmul_out);
+                LIF(&matmul_out, &U2, 3);
+                matmul_out.size = L3_SIZE_OUT;
+                matrixVectorMulSparse(&W3, &B3, &matmul_out);
+                LIF(&matmul_out, &U3, 5);
+
+                event_t *current = event_list;
+                while (current != NULL)
+                {
+                    actPred[current->position] += 1;
+                    current = current->next;
+                }
+                emptyList();
                 
             }
 
-            int predictedLabel = SNN.predict_fptr(&SNN);
+            // ----------------------------------------------------------------------------------------------- //
+            // -------------------------------------- Making a prediction ------------------------------------ //
+            // ----------------------------------------------------------------------------------------------- //
+
+            int predictedLabel = 0;
+            unsigned int max = actPred[0];
+            for(unsigned int i = 1; i < LIF3_SIZE; i++){
+                if(actPred[i] > max){
+                    predictedLabel = i;
+                    max = actPred[i];
+                }
+            }
 
             if (predictedLabel == trueLabel)
             {
@@ -149,13 +246,8 @@ int main(void)
             printf("Processed %s: Predicted class = %d, True Label = %d\n", entry->d_name, predictedLabel, trueLabel);
             
             fclose(file);
-
-            /* Reset the state */
-            SNN.resetState_fptr(&SNN);
         }
     }
-
-    SNN.clearModel_fptr(&SNN);
 
     closedir(dir);
 
@@ -168,7 +260,10 @@ int main(void)
     {
         printf("No .bin files processed.\n");
     }
-    #endif
+
+    free(W1.ptr);
+    free(W2.ptr);
+    free(W3.ptr);
 
     return 0;
 }
