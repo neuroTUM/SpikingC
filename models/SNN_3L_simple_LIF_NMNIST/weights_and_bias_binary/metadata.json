@@ -1,41 +1,44 @@
 {
-    "fc1.weight": {
+    "fc1_bias": {
         "shape": [
             578,
-            2312
+            1
         ],
-        "dtype": "torch.float32"
+        "data_type": "int8"
     },
-    "fc1.bias": {
-        "shape": [
-            578
-        ],
-        "dtype": "torch.float32"
-    },
-    "fc2.weight": {
+    "fc3_weights": {
         "shape": [
             289,
-            578
-        ],
-        "dtype": "torch.float32"
-    },
-    "fc2.bias": {
-        "shape": [
-            289
-        ],
-        "dtype": "torch.float32"
-    },
-    "fc3.weight": {
-        "shape": [
-            10,
-            289
-        ],
-        "dtype": "torch.float32"
-    },
-    "fc3.bias": {
-        "shape": [
             10
         ],
-        "dtype": "torch.float32"
+        "data_type": "int8"
+    },
+    "fc2_bias": {
+        "shape": [
+            289,
+            1
+        ],
+        "data_type": "int8"
+    },
+    "fc3_bias": {
+        "shape": [
+            10,
+            1
+        ],
+        "data_type": "int8"
+    },
+    "fc1_weights": {
+        "shape": [
+            2312,
+            578
+        ],
+        "data_type": "int8"
+    },
+    "fc2_weights": {
+        "shape": [
+            578,
+            289
+        ],
+        "data_type": "int8"
     }
 }
