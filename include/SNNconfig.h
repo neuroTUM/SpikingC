@@ -15,7 +15,7 @@ extern "C" {
 
 /* Test related macros */
 //#define TEST
-//#define BINARY_IMPLEMENTATION
+#define BINARY_IMPLEMENTATION
 #define DATALOADER
 //#define PRINT_WnB
 
@@ -46,11 +46,11 @@ extern "C" {
 #define LIF3_SIZE   10
 
 #ifdef BINARY_IMPLEMENTATION
-#define PATH_WEIGHTS_FC1_BIN    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc1_weight.bin"
+#define PATH_WEIGHTS_FC1_BIN    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc1_weights.bin"
 #define PATH_BIAS_FC1_BIN       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc1_bias.bin"
-#define PATH_WEIGHTS_FC2_BIN    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc2_weight.bin"
+#define PATH_WEIGHTS_FC2_BIN    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc2_weights.bin"
 #define PATH_BIAS_FC2_BIN       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc2_bias.bin"
-#define PATH_WEIGHTS_FC3_BIN    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc3_weight.bin"
+#define PATH_WEIGHTS_FC3_BIN    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc3_weights.bin"
 #define PATH_BIAS_FC3_BIN       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc3_bias.bin"
 #else
 #define PATH_WEIGHTS_FC1        "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias/fc1_weights.csv"
