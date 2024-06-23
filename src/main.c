@@ -95,7 +95,8 @@ int main(void)
 {
 
     // Load weights and biases
-    loadStaticWeightsAndBiases();
+    loadBinaryStaticWeightsAndBiases();
+
 
     // Weights and biases
     fxp8_2d_array_t W1;
@@ -142,114 +143,102 @@ int main(void)
     // ---------------------------------------- Data loading ----------------------------------------- //
     // ----------------------------------------------------------------------------------------------- //
 
-    const char *dataTestDirectory = PATH_BIN_DATA;
-    DIR *dir;
-    struct dirent *entry;
+    char filename[256];
+    // Create an array with specific numbers
+    int numbers[10] = {4890, 7962, 6453, 9978, 715, 3528, 8092, 1692, 4880, 2901};
 
     unsigned int totalPredictions = 0;
     unsigned int correctPredictions = 0;
 
-    if ((dir = opendir(dataTestDirectory)) == NULL)
+    for (unsigned int label = 0; label < 10; label++)
     {
-        perror("Failed to open directory");
-        return -1;
-    }
+        unsigned int tuki_file = numbers[label];
+        int trueLabel = label;
+        sprintf(filename, "/home/aleksa_tum/main/neuroTUM/Cpp_SNN_framework/SpikingCpp/tests/NMNIST_testset_bin/%u_%u.bin", tuki_file, label);
 
-    while ((entry = readdir(dir)) != NULL)
-    {
-        if (entry->d_type == DT_REG && strstr(entry->d_name, ".bin") != NULL)
+        FILE *file = fopen(filename, "rb");
+        if (!file)
         {
-            char filePath[1024];
-            snprintf(filePath, sizeof(filePath), "%s/%s", dataTestDirectory, entry->d_name);
+            perror("Failed to open file");
+            return -1;
+        }  
 
-            int trueLabel = extractLabelFromFilename(entry->d_name);
+        // Reset the membrane potential
+        for(unsigned int i = 0; i < LIF1_SIZE + LIF2_SIZE + LIF3_SIZE; i++)
+            mem_potential[i] = 0;
 
-            FILE *file = fopen(filePath, "rb");
-            if (!file)
+        // Empty the list
+        emptyList();
+
+        for(unsigned int i = 0; i < LIF3_SIZE; i++)
+            actPred[i] = 0;  
+
+        for(unsigned int i = 0; i < TIME_STEPS; i++)
+        {
+            loadTimestepFromFile(file, scrachpad_memory, i);
+
+            // ----------------------------------------------------------------------------------------------- //
+            // --------------------------------------- Data processing --------------------------------------- //
+            // ----------------------------------------------------------------------------------------------- //
+
+            /**********************************************************************************/
+            /* 
+                This code is necessary in order to transform the input vector
+                into a list of events
+            */
+            for(unsigned int i = 0; i < INPUT_SIZE; i++){
+                if(scrachpad_memory[i] == 1){
+                    pushToList(i);
+                }
+                else if(scrachpad_memory[i] == 2){
+                    pushToList(i);
+                    pushToList(i);
+                }
+            }
+            /**********************************************************************************/
+
+            matmul_out.size = L1_SIZE_OUT;
+            matrixVectorMulSparse(&W1, &B1, &matmul_out);
+            LIF(&matmul_out, &U1, 1);
+            matmul_out.size = L2_SIZE_OUT;
+            matrixVectorMulSparse(&W2, &B2, &matmul_out);
+            LIF(&matmul_out, &U2, 3);
+            matmul_out.size = L3_SIZE_OUT;
+            matrixVectorMulSparse(&W3, &B3, &matmul_out);
+            LIF(&matmul_out, &U3, 5);
+
+            event_t *current = event_list;
+            while (current != NULL)
             {
-                perror("Failed to open file");
-                return -1;
-            }  
-
-            // Reset the membrane potential
-            for(unsigned int i = 0; i < LIF1_SIZE + LIF2_SIZE + LIF3_SIZE; i++)
-                mem_potential[i] = 0;
-
-            // Empty the list
+                actPred[current->position] += 1;
+                current = current->next;
+            }
             emptyList();
-
-            for(unsigned int i = 0; i < LIF3_SIZE; i++)
-                actPred[i] = 0;  
-
-            for (unsigned int i = 0; i < TIME_STEPS; i++)
-            {
-                loadTimestepFromFile(file, scrachpad_memory, i);
-
-                // ----------------------------------------------------------------------------------------------- //
-                // --------------------------------------- Data processing --------------------------------------- //
-                // ----------------------------------------------------------------------------------------------- //
-
-                /**********************************************************************************/
-                /* This code is necessary in order to transform the input vector
-                   into a list of events
-                */
-                for(unsigned int i = 0; i < INPUT_SIZE; i++){
-                    if(scrachpad_memory[i] == 1){
-                        pushToList(i);
-                    }
-                    else if(scrachpad_memory[i] == 2){
-                        pushToList(i);
-                        pushToList(i);
-                    }
-                }
-                /**********************************************************************************/
-
-                matmul_out.size = L1_SIZE_OUT;
-                matrixVectorMulSparse(&W1, &B1, &matmul_out);
-                LIF(&matmul_out, &U1, 1);
-                matmul_out.size = L2_SIZE_OUT;
-                matrixVectorMulSparse(&W2, &B2, &matmul_out);
-                LIF(&matmul_out, &U2, 3);
-                matmul_out.size = L3_SIZE_OUT;
-                matrixVectorMulSparse(&W3, &B3, &matmul_out);
-                LIF(&matmul_out, &U3, 5);
-
-                event_t *current = event_list;
-                while (current != NULL)
-                {
-                    actPred[current->position] += 1;
-                    current = current->next;
-                }
-                emptyList();
-                
-            }
-
-            // ----------------------------------------------------------------------------------------------- //
-            // -------------------------------------- Making a prediction ------------------------------------ //
-            // ----------------------------------------------------------------------------------------------- //
-
-            int predictedLabel = 0;
-            unsigned int max = actPred[0];
-            for(unsigned int i = 1; i < LIF3_SIZE; i++){
-                if(actPred[i] > max){
-                    predictedLabel = i;
-                    max = actPred[i];
-                }
-            }
-
-            if (predictedLabel == trueLabel)
-            {
-                correctPredictions++;
-            }
-            totalPredictions++;
-
-            printf("Processed %s: Predicted class = %d, True Label = %d\n", entry->d_name, predictedLabel, trueLabel);
-            
-            fclose(file);
         }
-    }
 
-    closedir(dir);
+        // ----------------------------------------------------------------------------------------------- //
+        // -------------------------------------- Making a prediction ------------------------------------ //
+        // ----------------------------------------------------------------------------------------------- //
+
+        int predictedLabel = 0;
+        unsigned int max = actPred[0];
+        for(unsigned int i = 1; i < LIF3_SIZE; i++){
+            if(actPred[i] > max){
+                predictedLabel = i;
+                max = actPred[i];
+            }
+        }
+
+        if (predictedLabel == trueLabel)
+        {
+            correctPredictions++;
+        }
+        totalPredictions++;
+
+        printf("Processed %s: Predicted class = %d, True Label = %d\n", filename, predictedLabel, trueLabel);
+        
+        fclose(file);
+    }
 
     if (totalPredictions > 0)
     {

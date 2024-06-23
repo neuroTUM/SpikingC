@@ -13,6 +13,6 @@ fxp8_t          W[INPUT_SIZE * L1_SIZE_OUT  +
 fxp8_t          B[L1_SIZE_OUT  + 
                   L2_SIZE_OUT  + 
                   L3_SIZE_OUT];
-fxp16_t         scrachpad_memory[INPUT_SIZE + L1_SIZE_OUT];
+fxp16_t         scrachpad_memory[INPUT_SIZE];
 fxp16_t         mem_potential[LIF1_SIZE + LIF2_SIZE + LIF3_SIZE];
 event_t*        event_list = NULL;

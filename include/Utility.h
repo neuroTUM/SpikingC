@@ -9,12 +9,6 @@ extern "C" {
 #include <ctype.h>
 #include <math.h>
 
-#define MAX_LINE_LENGTH 10000 // Adjust based on your CSV line length
-#define EPSILON 0.001         // Acceptable margin of error for comparison
-
-/* Macro function used to access individual bits */
-#define BITVALUE(X, N) (((X) >> (N)) & 0x1)
-
 /**
  * Returns offsets for pointer positioning.
  * Offset type is 'M' for matrices, 'V' for float vectors and 'S' for spikes.
@@ -67,72 +61,6 @@ bool pushToList(unsigned int el);
 */
 void emptyList();
 
-#ifndef BINARY_IMPLEMENTATION
-
-/**
- * Loads weight values from a CSV file into a static array for neural network weights.
- * This function parses the CSV file and converts string representations of floating point numbers into actual floating
- * point values, storing them sequentially into a provided array starting at a specified index.
- *
- * @param filepath Path to the CSV file containing weight values.
- * @param W Pointer to the array where weights will be stored.
- * @param startIdx Starting index in the array where weights will be loaded.
- * @param elements Total number of weight elements to read from the file.
- */
-void loadCSVToStaticWeightArray(const char *filepath, fxp8_t *W, unsigned int startIdx, unsigned int elements);
-
-/**
- * Loads bias values from a CSV file into a static array.
- * Similar to the weight-loading function but specifically designed for bias values,
- * reading a single line of floating point numbers representing biases for a network layer.
- *
- * @param filepath Path to the CSV file containing bias values.
- * @param B Pointer to the array where biases will be stored.
- * @param startIdx Starting index in the array where biases will be loaded.
- * @param size Total number of bias elements to read from the file.
- */
-void loadCSVToStaticBiasArray(const char *filepath, fxp8_t *B, unsigned int startIdx, unsigned int size);
-
-/**
- * Initiates the loading of all weights and biases for the neural network from CSV files.
- * This function orchestrates the sequential loading of weights and biases for multiple layers of a neural network,
- * setting the correct indices and sizes for each layer based on predefined layer dimensions.
- */
-void loadStaticWeightsAndBiases();
-
-/**
- * Reads a CSV file and stores its contents into a dynamically allocated 2D array of floats.
- * This function opens a CSV file, reads it line by line, and splits each line into tokens based on comma delimiters,
- * converting each token into a float and storing it in an array.
- *
- * @param filename Path to the CSV file.
- * @param rows Pointer to an integer where the number of rows will be stored.
- * @param cols Pointer to an integer where the number of columns will be stored.
- * @return A pointer to a 2D array of floats containing the parsed data.
- */
-float **readCSV(const char *filename, int *rows, int *cols);
-
-/**
- * Frees the memory allocated for a 2D array of floats.
- * This function is used to clean up memory after it is no longer needed, typically after processing CSV data.
- *
- * @param data Pointer to the 2D array of floats.
- * @param rows Number of rows in the array (i.e., how many pointers in the first dimension to free).
- */
-void freeCSVData(float **data, int rows);
-
-/**
- * Converts a string to a floating point number (double precision).
- * This function is a simple alternative to standard library functions like atof, providing error handling and improved
- * robustness.
- *
- * @param str Pointer to the string containing the number to convert.
- * @return The converted double value.
- */
-double simple_atof(const char *str);
-
-#else
-
 /**
  * Loads weight values from a binary file into a static array.
  * Directly reads binary floating point data into the weight array, which is more efficient than parsing text.
@@ -143,7 +71,7 @@ double simple_atof(const char *str);
  * @param startIdx Starting index in the array where weights will be loaded.
  * @param elements Total number of weight elements to read from the file.
  */
-void loadBinaryToStaticWeightArray(const char *filepath, fxp8_t *W, unsigned int startIdx, unsigned int elements);
+void loadBinaryToStaticWeightArray(const char *filepath, unsigned int startIdx, unsigned int elements);
 
 /**
  * Loads bias values from a binary file into a static array.
@@ -154,7 +82,7 @@ void loadBinaryToStaticWeightArray(const char *filepath, fxp8_t *W, unsigned int
  * @param startIdx Starting index in the array where biases will be loaded.
  * @param size Total number of bias elements to read from the file.
  */
-void loadBinaryToStaticBiasArray(const char *filepath, fxp8_t *B, unsigned int startIdx, unsigned int size);
+void loadBinaryToStaticBiasArray(const char *filepath, unsigned int startIdx, unsigned int size);
 
 /**
  * Initiates the loading of all weights and biases for the neural network from binary files.
@@ -162,64 +90,6 @@ void loadBinaryToStaticBiasArray(const char *filepath, fxp8_t *B, unsigned int s
  * leveraging binary file operations for optimal performance.
  */
 void loadBinaryStaticWeightsAndBiases();
-
-/**
- * Loads input data from a binary file directly into the provided memory buffer.
- * Assumes the binary file contains float data (as used by your model).
- *
- * @param filename The path to the binary input file.
- * @param buffer The memory buffer to load data into.
- * @param size The number of float elements expected in the buffer.
- * @return 1 on success, 0 on failure.
- */
-int loadBinaryInputData(const char *filename, fxp16_t *buffer, size_t size);
-
-/**
- * Loads an array of floating-point data from a binary file. This function is designed to be used
- * for reading continuous blocks of float data, such as neural network weights or any floating-point parameters.
- *
- * @param filename The path to the binary file from which to read the float data.
- * @param size The number of float elements to be read from the file.
- * @return Pointer to the array of floats read from the file, or NULL if an error occurs.
- *         The caller is responsible for freeing this memory.
- * @note This function allocates memory for the returned array and the caller must free it.
- */
-float *loadBinaryFloatData(const char *filename, size_t size);
-
-/**
- * Loads an array of spike data from a binary file. This function is particularly useful
- * for neural network models where spike information is stored in a compact binary format.
- *
- * @param filename The path to the binary file from which to read the spike data.
- * @param size The number of spike_t elements to be read from the file.
- * @return Pointer to the array of spike_t data read from the file, or NULL if an error occurs.
- *         The caller is responsible for freeing this memory.
- * @note This function allocates memory for the returned array and the caller must free it.
- */
-spike_t *loadBinarySpikeData(const char *filename, size_t size);
-
-#endif
-
-#ifdef DATALOADER
-
-/**
- * Extracts a label from a filename string based on a naming convention where the label is embedded between underscores
- * and a dot. Example: "image_12345_9.bin" would return 9 as the label.
- *
- * @param filename The filename from which to extract the label.
- * @return The extracted label as an integer.
- */
-int extractLabelFromFilename(const char *filename);
-
-/**
- * Reads input data from a binary file and stores it into the scratchpad memory.
- * Assumes the binary file contains int16_t data to be converted to fxp16_t.
- *
- * @param filePath Path to the binary file to read.
- * @param scratchpadMemory Pointer to the scratchpad memory where input data should be stored.
- * @param bufferSize Number of elements to read into the scratchpad memory.
- */
-void loadInputsFromFile(const char *filePath, fxp16_t *scratchpadMemory, size_t bufferSize);
 
 /**
  * Reads input data for a specific timestep from a binary file and loads it into scratchpad memory.
@@ -231,8 +101,6 @@ void loadInputsFromFile(const char *filePath, fxp16_t *scratchpadMemory, size_t 
  * @param timestepIndex Index of the timestep to load.
  */
 void loadTimestepFromFile(FILE *file, fxp16_t *scratchpadMemory, size_t timestepIndex);
-
-#endif
 
 #ifdef __cplusplus
 }

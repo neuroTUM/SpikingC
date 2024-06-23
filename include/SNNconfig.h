@@ -13,17 +13,6 @@ extern "C" {
 #include <ctype.h>
 #include <stdint.h>
 
-/* Test related macros */
-//#define TEST
-#define BINARY_IMPLEMENTATION
-#define DATALOADER
-//#define PRINT_WnB
-
-#ifdef DATALOADER
-#include <dirent.h> // For directory operations
-#include <sys/types.h>
-#endif
-
 /* General macros */
 #define MAX_STR_LEN 10
 
@@ -45,21 +34,12 @@ extern "C" {
 #define L3_SIZE_OUT 10
 #define LIF3_SIZE   10
 
-#ifdef BINARY_IMPLEMENTATION
 #define PATH_WEIGHTS_FC1_BIN    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc1_weights.bin"
 #define PATH_BIAS_FC1_BIN       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc1_bias.bin"
 #define PATH_WEIGHTS_FC2_BIN    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc2_weights.bin"
 #define PATH_BIAS_FC2_BIN       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc2_bias.bin"
 #define PATH_WEIGHTS_FC3_BIN    "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc3_weights.bin"
 #define PATH_BIAS_FC3_BIN       "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias_binary/fc3_bias.bin"
-#else
-#define PATH_WEIGHTS_FC1        "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias/fc1_weights.csv"
-#define PATH_BIAS_FC1           "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias/fc1_bias.csv"
-#define PATH_WEIGHTS_FC2        "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias/fc2_weights.csv"
-#define PATH_BIAS_FC2           "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias/fc2_bias.csv"
-#define PATH_WEIGHTS_FC3        "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias/fc3_weights.csv"
-#define PATH_BIAS_FC3           "../../models/SNN_3L_simple_LIF_NMNIST/weights_and_bias/fc3_bias.csv"
-#endif
 
 /* Fixed-point representation for network elements like membrane potentials, thresholds and beta values */
 typedef int16_t fxp16_t;
@@ -85,7 +65,7 @@ extern fxp8_t B[L1_SIZE_OUT  +
                   L3_SIZE_OUT];
 
 /* Statically allocated scrach pad memory used for inputs and outputs of linear layers*/
-extern fxp16_t scrachpad_memory[INPUT_SIZE + L1_SIZE_OUT];
+extern fxp16_t scrachpad_memory[INPUT_SIZE];
 
 /* Statically allocated memory for membrane potentials */
 extern fxp16_t mem_potential[LIF1_SIZE + LIF2_SIZE + LIF3_SIZE];
