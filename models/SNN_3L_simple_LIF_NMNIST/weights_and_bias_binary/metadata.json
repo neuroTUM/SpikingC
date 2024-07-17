@@ -1,15 +1,8 @@
 {
-    "fc1_bias": {
+    "fc1_weights": {
         "shape": [
-            578,
-            1
-        ],
-        "data_type": "int8"
-    },
-    "fc3_weights": {
-        "shape": [
-            289,
-            10
+            2312,
+            592
         ],
         "data_type": "int8"
     },
@@ -20,6 +13,20 @@
         ],
         "data_type": "int8"
     },
+    "fc1_bias": {
+        "shape": [
+            578,
+            1
+        ],
+        "data_type": "int8"
+    },
+    "fc2_weights": {
+        "shape": [
+            578,
+            304
+        ],
+        "data_type": "int8"
+    },
     "fc3_bias": {
         "shape": [
             10,
@@ -27,17 +34,10 @@
         ],
         "data_type": "int8"
     },
-    "fc1_weights": {
+    "fc3_weights": {
         "shape": [
-            2312,
-            578
-        ],
-        "data_type": "int8"
-    },
-    "fc2_weights": {
-        "shape": [
-            578,
-            289
+            289,
+            16
         ],
         "data_type": "int8"
     }
